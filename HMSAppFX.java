@@ -4,10 +4,146 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+
+// Row classes for TableView
+class DoctorRow {
+    private final SimpleStringProperty id;
+    private final SimpleStringProperty name;
+    private final SimpleStringProperty specialist;
+    private final SimpleStringProperty workTime;
+    private final SimpleStringProperty qualification;
+    private final SimpleStringProperty roomFormatted;
+
+    public DoctorRow(String id, String name, String specialist, String workTime, String qualification, int room) {
+        this.id = new SimpleStringProperty(id);
+        this.name = new SimpleStringProperty(name);
+        this.specialist = new SimpleStringProperty(specialist);
+        this.workTime = new SimpleStringProperty(workTime);
+        this.qualification = new SimpleStringProperty(qualification);
+        this.roomFormatted = new SimpleStringProperty(String.format("%03d", room));
+    }
+
+    public String getId() { return id.get(); }
+    public String getName() { return name.get(); }
+    public String getSpecialist() { return specialist.get(); }
+    public String getWorkTime() { return workTime.get(); }
+    public String getQualification() { return qualification.get(); }
+    public String getRoomFormatted() { return roomFormatted.get(); }
+}
+
+class PatientRow {
+    private final SimpleStringProperty id;
+    private final SimpleStringProperty name;
+    private final SimpleStringProperty disease;
+    private final SimpleStringProperty sex;
+    private final SimpleStringProperty admitStatus;
+    private final SimpleIntegerProperty age;
+
+    public PatientRow(String id, String name, String disease, String sex, String admitStatus, int age) {
+        this.id = new SimpleStringProperty(id);
+        this.name = new SimpleStringProperty(name);
+        this.disease = new SimpleStringProperty(disease);
+        this.sex = new SimpleStringProperty(sex);
+        this.admitStatus = new SimpleStringProperty(admitStatus);
+        this.age = new SimpleIntegerProperty(age);
+    }
+
+    public String getId() { return id.get(); }
+    public String getName() { return name.get(); }
+    public String getDisease() { return disease.get(); }
+    public String getSex() { return sex.get(); }
+    public String getAdmitStatus() { return admitStatus.get(); }
+    public int getAge() { return age.get(); }
+}
+
+class MedicineRow {
+    private final SimpleStringProperty name;
+    private final SimpleStringProperty manufacturer;
+    private final SimpleStringProperty expiryDate;
+    private final SimpleIntegerProperty cost;
+
+    public MedicineRow(String name, String manufacturer, String expiryDate, int cost) {
+        this.name = new SimpleStringProperty(name);
+        this.manufacturer = new SimpleStringProperty(manufacturer);
+        this.expiryDate = new SimpleStringProperty(expiryDate);
+        this.cost = new SimpleIntegerProperty(cost);
+    }
+
+    public String getName() { return name.get(); }
+    public String getManufacturer() { return manufacturer.get(); }
+    public String getExpiryDate() { return expiryDate.get(); }
+    public int getCost() { return cost.get(); }
+}
+
+class LabRow {
+    private final SimpleStringProperty lab;
+    private final SimpleIntegerProperty cost;
+
+    public LabRow(String lab, int cost) {
+        this.lab = new SimpleStringProperty(lab);
+        this.cost = new SimpleIntegerProperty(cost);
+    }
+
+    public String getLab() { return lab.get(); }
+    public int getCost() { return cost.get(); }
+}
+
+class FacilityRow {
+    private final SimpleStringProperty facility;
+
+    public FacilityRow(String facility) {
+        this.facility = new SimpleStringProperty(facility);
+    }
+
+    public String getFacility() { return facility.get(); }
+}
+
+class StaffRow {
+    private final SimpleStringProperty id;
+    private final SimpleStringProperty name;
+    private final SimpleStringProperty designation;
+    private final SimpleStringProperty shift;
+    private final SimpleStringProperty licenseNumber;
+    private final SimpleStringProperty clearanceLevel;
+    private final SimpleStringProperty sex;
+    private final SimpleIntegerProperty salary;
+
+    public StaffRow(String id, String name, String designation, String shift, String licenseNumber, String clearanceLevel, String sex, int salary) {
+        this.id = new SimpleStringProperty(id);
+        this.name = new SimpleStringProperty(name);
+        this.designation = new SimpleStringProperty(designation);
+        this.shift = new SimpleStringProperty(shift != null ? shift : "-");
+        this.licenseNumber = new SimpleStringProperty(licenseNumber != null ? licenseNumber : "-");
+        this.clearanceLevel = new SimpleStringProperty(clearanceLevel != null ? clearanceLevel : "-");
+        this.sex = new SimpleStringProperty(sex);
+        this.salary = new SimpleIntegerProperty(salary);
+    }
+
+    public String getId() { return id.get(); }
+    public String getName() { return name.get(); }
+    public String getDesignation() { return designation.get(); }
+    public String getShift() { return shift.get(); }
+    public String getLicenseNumber() { return licenseNumber.get(); }
+    public String getClearanceLevel() { return clearanceLevel.get(); }
+    public String getSex() { return sex.get(); }
+    public int getSalary() { return salary.get(); }
+}
+
+// Custom exception for validation
+class ValidationException extends Exception {
+    public ValidationException(String message) {
+        super(message);
+    }
+}
 
 public class HMSAppFX extends Application {
 
@@ -24,472 +160,934 @@ public class HMSAppFX extends Application {
         HospitalManagement.initializeSampleData();
         reloadAllFromHM();
 
+        // Create main container with background
+        VBox mainContainer = new VBox();
+        mainContainer.setStyle(
+            "-fx-background: linear-gradient(to bottom, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%);" +
+            "-fx-padding: 20;"
+        );
+
+        // Create title header
+        Label titleLabel = new Label("Hospital Management System");
+        titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 28));
+        titleLabel.setTextFill(Color.web("#1565c0"));
+        titleLabel.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 0, 2);");
+        
+        HBox titleBox = new HBox(titleLabel);
+        titleBox.setAlignment(Pos.CENTER);
+        titleBox.setPadding(new Insets(0, 0, 20, 0));
+
         TabPane tabs = new TabPane(
-                tab("Doctors",   doctorsPane()),
-                tab("Patients",  patientsPane()),
-                tab("Medicine",  medicinesPane()),
-                tab("Labs",      labsPane()),
-                tab("Facilities",facilitiesPane()),
-                tab("Staff",     staffPane())
+                createStyledTab("👨‍⚕️ Doctors",   doctorsPane()),
+                createStyledTab("🏥 Patients",  patientsPane()),
+                createStyledTab("💊 Medicine",  medicinesPane()),
+                createStyledTab("🔬 Labs",      labsPane()),
+                createStyledTab("🏢 Facilities",facilitiesPane()),
+                createStyledTab("👥 Staff",     staffPane())
         );
         tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        tabs.setStyle(
+            "-fx-background-color: rgba(255,255,255,0.9);" +
+            "-fx-background-radius: 15;" +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 3);"
+        );
 
-        Scene scene = new Scene(tabs, 1024, 600);
-        stage.setTitle("Hospital Management (JavaFX)");
+        mainContainer.getChildren().addAll(titleBox, tabs);
+        VBox.setVgrow(tabs, Priority.ALWAYS);
+
+        Scene scene = new Scene(mainContainer, 1200, 700);
+        stage.setTitle("Hospital Management System - JavaFX");
         stage.setScene(scene);
         stage.show();
     }
 
-    private Tab tab(String title, Region content) {
-        Tab t = new Tab(title);
-        t.setContent(new StackPane(content));
-        return t;
-    }
-
-    // ====================== Doctors ======================
-    private BorderPane doctorsPane() {
-        TableView<DoctorRow> tv = new TableView<>(doctors);
-        tv.getColumns().addAll(
-                col("ID", DoctorRow::id),
-                col("Name", DoctorRow::name),
-                col("Specialist", DoctorRow::specialist),
-                col("Work Time", DoctorRow::workTime),
-                col("Qualification", DoctorRow::qualification),
-                colInt("Room No.", DoctorRow::room)
+    private Tab createStyledTab(String title, Region content) {
+        Tab tab = new Tab(title);
+        
+        // Create content wrapper with styling
+        VBox wrapper = new VBox(content);
+        wrapper.setStyle(
+            "-fx-background-color: rgba(255,255,255,0.95);" +
+            "-fx-background-radius: 10;" +
+            "-fx-padding: 15;"
         );
-        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        TextField tfId    = tf("ID", 90);
-        TextField tfName  = tf("Name", 140);
-        TextField tfSpec  = tf("Specialist", 140);
-        TextField tfWork  = tf("Work Time", 120);
-        TextField tfQual  = tf("Qualification", 160);
-        TextField tfRoom  = tf("Room No. (>=0)", 120);
-        Button add = new Button("Add Doctor");
-        add.setMinWidth(110); 
-        add.setOnAction(e -> {
-            try {
-                String id   = mustNonEmpty(tfId.getText(), "ID");
-                String name = mustNonEmpty(tfName.getText(), "Name");
-                String sp   = mustNonEmpty(tfSpec.getText(), "Specialist");
-                String wt   = mustNonEmpty(tfWork.getText(), "Work Time");
-                String q    = mustNonEmpty(tfQual.getText(), "Qualification");
-                int room    = mustNonNegativeInt(tfRoom.getText(), "Room No.");
-                Doctor d = new Doctor(id, name, sp, wt, q, room);
-                if (!HospitalManagement.addDoctor(d)) warn("Doctor array is full in HospitalManagement.");
-                reloadDoctors(); tv.refresh();
-                clear(tfId, tfName, tfSpec, tfWork, tfQual, tfRoom);
-            } catch (IllegalArgumentException ex) { error(ex.getMessage()); }
-        });
-
-        HBox form = row(tfId, tfName, tfSpec, tfWork, tfQual, tfRoom, add);
-        BorderPane root = new BorderPane(tv);
-        root.setBottom(form);
-        return root;
+        
+        ScrollPane scrollPane = new ScrollPane(wrapper);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setStyle("-fx-background-color: transparent;");
+        
+        tab.setContent(scrollPane);
+        return tab;
     }
 
-    // ====================== Patients ======================
-    private BorderPane patientsPane() {
-        TableView<PatientRow> tv = new TableView<>(patients);
-        tv.getColumns().addAll(
-                col("ID", PatientRow::id),
-                col("Name", PatientRow::name),
-                col("Disease", PatientRow::disease),
-                col("Sex", PatientRow::sex),
-                col("Admit Status", PatientRow::admitStatus),
-                colInt("Age", PatientRow::age)
-        );
-        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        TextField tfId   = tf("ID", 90);
-        TextField tfName = tf("Name", 140);
-        TextField tfDis  = tf("Disease", 140);
-        ComboBox<String> cbSex = new ComboBox<>(FXCollections.observableArrayList("M", "F"));
-        cbSex.setPromptText("Sex (M/F)");
-        cbSex.setPrefWidth(110);
-        TextField tfAdmit= tf("Admit Status", 140);
-        TextField tfAge  = tf("Age (>=0)", 90);
-        Button add = new Button("Add Patient");
-        add.setMinWidth(110);
-        add.setOnAction(e -> {
-            try {
-                String id   = mustNonEmpty(tfId.getText(), "ID");
-                String name = mustNonEmpty(tfName.getText(), "Name");
-                String dis  = mustNonEmpty(tfDis.getText(), "Disease");
-                String sex  = mustSex(cbSex.getValue());
-                String adm  = mustNonEmpty(tfAdmit.getText(), "Admit Status");
-                int age     = mustNonNegativeInt(tfAge.getText(), "Age");
-                Patient p = new Patient(id, name, dis, sex, adm, age);
-                if (!HospitalManagement.addPatient(p)) warn("Patient array is full in HospitalManagement.");
-                reloadPatients(); tv.refresh();
-                clear(tfId, tfName, tfDis, tfAdmit, tfAge); cbSex.getSelectionModel().clearSelection();
-            } catch (IllegalArgumentException ex) { error(ex.getMessage()); }
-        });
-
-        HBox form = row(tfId, tfName, tfDis, cbSex, tfAdmit, tfAge, add);
-        BorderPane root = new BorderPane(tv);
-        root.setBottom(form);
-        return root;
+    // ===== Helper methods for table columns =====
+    private <T> TableColumn<T, String> col(String name, java.util.function.Function<T, String> getter) {
+        TableColumn<T, String> col = new TableColumn<>(name);
+        col.setCellValueFactory(cellData -> new SimpleStringProperty(getter.apply(cellData.getValue())));
+        return col;
     }
 
-    // ====================== Medicine ======================
-    private BorderPane medicinesPane() {
-        TableView<MedicineRow> tv = new TableView<>(medicines);
-        tv.getColumns().addAll(
-                col("Name", MedicineRow::name),
-                col("Manufacturer", MedicineRow::manufacturer),
-                col("Expiry Date", MedicineRow::expiryDate),
-                colInt("Cost", MedicineRow::cost)
-        );
-        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        TextField tfName = tf("Name", 160);
-        TextField tfManu = tf("Manufacturer", 160);
-        TextField tfExp  = tf("Expiry Date (YYYY-MM-DD)", 200);
-        TextField tfCost = tf("Cost (>=0)", 100);
-        Button add = new Button("Add Medicine");
-        add.setMinWidth(120);
-        add.setOnAction(e -> {
-            try {
-                String name = mustNonEmpty(tfName.getText(), "Name");
-                String manu = mustNonEmpty(tfManu.getText(), "Manufacturer");
-                String exp  = mustNonEmpty(tfExp.getText(), "Expiry Date");
-                int cost    = mustNonNegativeInt(tfCost.getText(), "Cost");
-                Medicine m = new Medicine(name, manu, exp, cost, 0);
-                if (!HospitalManagement.addMedicine(m)) warn("Medicine array is full in HospitalManagement.");
-                reloadMedicines(); tv.refresh();
-                clear(tfName, tfManu, tfExp, tfCost);
-            } catch (IllegalArgumentException ex) { error(ex.getMessage()); }
-        });
-
-        HBox form = row(tfName, tfManu, tfExp, tfCost, add);
-        BorderPane root = new BorderPane(tv);
-        root.setBottom(form);
-        return root;
+    private <T> TableColumn<T, Integer> colInt(String name, java.util.function.Function<T, Integer> getter) {
+        TableColumn<T, Integer> col = new TableColumn<>(name);
+        col.setCellValueFactory(cellData -> new SimpleIntegerProperty(getter.apply(cellData.getValue())).asObject());
+        return col;
     }
 
-    // ====================== Labs ======================
-    private BorderPane labsPane() {
-        TableView<LabRow> tv = new TableView<>(labs);
-        tv.getColumns().addAll(col("Lab", LabRow::lab), colInt("Cost", LabRow::cost));
-        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        TextField tfLab  = tf("Lab", 200);
-        TextField tfCost = tf("Cost (>=0)", 120);
-        Button add = new Button("Add Lab");
-        add.setMinWidth(100);
-        add.setOnAction(e -> {
-            try {
-                String lab = mustNonEmpty(tfLab.getText(), "Lab");
-                int cost   = mustNonNegativeInt(tfCost.getText(), "Cost");
-                Lab l = new Lab(lab, cost);
-                if (!HospitalManagement.addLab(l)) warn("Lab array is full in HospitalManagement.");
-                reloadLabs(); tv.refresh();
-                clear(tfLab, tfCost);
-            } catch (IllegalArgumentException ex) { error(ex.getMessage()); }
-        });
-
-        HBox form = row(tfLab, tfCost, add);
-        BorderPane root = new BorderPane(tv);
-        root.setBottom(form);
-        return root;
-    }
-
-    // ====================== Facilities ======================
-    private BorderPane facilitiesPane() {
-        TableView<FacilityRow> tv = new TableView<>(facilities);
-        tv.getColumns().addAll(col("Facility", FacilityRow::facility));
-        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        TextField tfFac = tf("Facility", 260);
-        Button add = new Button("Add Facility");
-        add.setMinWidth(120);
-        add.setOnAction(e -> {
-            try {
-                String f = mustNonEmpty(tfFac.getText(), "Facility");
-                Facility fac = new Facility(f);
-                if (!HospitalManagement.addFacility(fac)) warn("Facility array is full in HospitalManagement.");
-                reloadFacilities(); tv.refresh();
-                clear(tfFac);
-            } catch (IllegalArgumentException ex) { error(ex.getMessage()); }
-        });
-
-        HBox form = row(tfFac, add);
-        BorderPane root = new BorderPane(tv);
-        root.setBottom(form);
-        return root;
-    }
-
-    // ====================== Staff ======================
-    private BorderPane staffPane() {
-        TableView<StaffRow> tv = new TableView<>(staffs);
-        tv.getColumns().addAll(
-                col("ID", StaffRow::id),
-                col("Name", StaffRow::name),
-                col("Designation", StaffRow::designation),
-                col("Shift", StaffRow::shift),
-                col("License Number", StaffRow::licenseNumber),
-                col("Clearance Level", StaffRow::clearanceLevel),
-                col("Sex", StaffRow::sex),
-                colInt("Salary", StaffRow::salary)
-        );
-        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        TextField tfId   = tf("ID", 90);
-        TextField tfName = tf("Name", 140);
-        ComboBox<String> cbDes = new ComboBox<>(FXCollections.observableArrayList("Nurse", "Pharmacist", "Security", "Staff"));
-        cbDes.setPromptText("Designation");
-        cbDes.setPrefWidth(130);
-        ComboBox<String> cbSex = new ComboBox<>(FXCollections.observableArrayList("M", "F"));
-        cbSex.setPromptText("Sex (M/F)");
-        cbSex.setPrefWidth(100);
-        TextField tfSalary = tf("Salary (>=0)", 110);
-
-        TextField tfShift = tf("Shift: Day/Night", 130);
-        TextField tfLic   = tf("License Number", 160);
-        TextField tfClr   = tf("Clearance: L1/L2/L3 or Low/Medium/High", 260);
-
-        cbDes.valueProperty().addListener((obs, o, n) -> {
-            String v = n == null ? "" : n;
-            tfShift.setDisable(!"Nurse".equals(v));
-            tfLic.setDisable(!"Pharmacist".equals(v));
-            tfClr.setDisable(!"Security".equals(v));
-        });
-        cbDes.getSelectionModel().select("Staff");
-
-        Button add = new Button("Add Staff");
-        add.setMinWidth(110); 
-        add.setOnAction(e -> {
-            try {
-                String id   = mustNonEmpty(tfId.getText(), "ID");
-                String name = mustNonEmpty(tfName.getText(), "Name");
-                String des  = mustNonEmpty(cbDes.getValue(), "Designation");
-                String sex  = mustSex(cbSex.getValue());
-                int salary  = mustNonNegativeInt(tfSalary.getText(), "Salary");
-
-                Staff s;
-                switch (des) {
-                    case "Nurse":
-                        String shift = mustShift(tfShift.getText());
-                        s = new Nurse(id, name, sex, salary, shift);
-                        break;
-                    case "Pharmacist":
-                        String lic = mustNonEmpty(tfLic.getText(), "License Number");
-                        s = new Pharmacist(id, name, sex, salary, lic);
-                        break;
-                    case "Security":
-                        String clr = normalizeClearanceStrict(tfClr.getText());
-                        s = new SecurityStaff(id, name, sex, salary, clr);
-                        break;
-                    default:
-                        s = new Staff(id, name, "Staff", sex, salary);
-                }
-
-                if (!HospitalManagement.addStaff(s)) { warn("Staff array is full in HospitalManagement."); return; }
-                reloadStaffs(); tv.refresh();
-
-                clear(tfId, tfName, tfSalary, tfShift, tfLic, tfClr);
-                cbDes.getSelectionModel().select("Staff");
-                cbSex.getSelectionModel().clearSelection();
-            } catch (IllegalArgumentException ex) { error(ex.getMessage()); }
-        });
-
-        HBox form = row(tfId, tfName, cbDes, cbSex, tfSalary, tfShift, tfLic, tfClr, add);
-        BorderPane root = new BorderPane(tv);
-        root.setBottom(form);
-        return root;
-    }
-
-    // ===== UI helpers =====
-    private TextField tf(String prompt, double prefW) {
-        TextField t = new TextField();
-        t.setPromptText(prompt);
-        t.setPrefWidth(prefW);
-        return t;
-    }
-
-    private HBox row(javafx.scene.Node... nodes) {
-        HBox h = new HBox(8, nodes);
-        h.setPadding(new Insets(10));
-        for (javafx.scene.Node n : nodes) {
-            if (n instanceof Button) {
-                ((Button) n).setMinWidth(Region.USE_PREF_SIZE);
-            } else if (n instanceof TextField || n instanceof ComboBox) {
-                HBox.setHgrow(n, Priority.SOMETIMES);
-            }
-        }
-        return h;
-    }
-
-    // ===== Loaders =====
+    // ===== Data reload methods =====
     private void reloadAllFromHM() {
-        reloadDoctors(); reloadPatients(); reloadMedicines(); reloadLabs(); reloadFacilities(); reloadStaffs();
+        reloadDoctors();
+        reloadPatients();
+        reloadMedicines();
+        reloadLabs();
+        reloadFacilities();
+        reloadStaffs();
     }
 
     private void reloadDoctors() {
         doctors.clear();
-        Doctor[] arr = HospitalManagement.getDoctors();
-        int n = HospitalManagement.getDoctorCount();
-        for (int i = 0; i < n; i++) {
-            Doctor d = arr[i];
-            doctors.add(new DoctorRow(d.getId(), d.getName(), d.getSpecialist(), d.getWorkTime(), d.getQualification(), d.getRoom()));
+        Doctor[] docs = HospitalManagement.getDoctors();
+        int count = HospitalManagement.getDoctorCount();
+        for (int i = 0; i < count; i++) {
+            Doctor d = docs[i];
+            doctors.add(new DoctorRow(d.getId(), d.getName(), d.getSpecialist(), 
+                        d.getWorkTime(), d.getQualification(), d.getRoom()));
         }
     }
 
     private void reloadPatients() {
         patients.clear();
-        Patient[] arr = HospitalManagement.getPatients();
-        int n = HospitalManagement.getPatientCount();
-        for (int i = 0; i < n; i++) {
-            Patient p = arr[i];
-            patients.add(new PatientRow(p.getId(), p.getName(), p.getDisease(), p.getSex(), p.getAdmitStatus(), p.getAge()));
+        Patient[] pts = HospitalManagement.getPatients();
+        int count = HospitalManagement.getPatientCount();
+        for (int i = 0; i < count; i++) {
+            Patient p = pts[i];
+            patients.add(new PatientRow(p.getId(), p.getName(), p.getDisease(), 
+                        p.getSex(), p.getAdmitStatus(), p.getAge()));
         }
     }
 
     private void reloadMedicines() {
         medicines.clear();
-        Medicine[] arr = HospitalManagement.getMedicines();
-        int n = HospitalManagement.getMedicineCount();
-        for (int i = 0; i < n; i++) {
-            Medicine m = arr[i];
-            medicines.add(new MedicineRow(m.getName(), m.getManufacturer(), m.getExpiryDate(), m.getCost()));
+        Medicine[] meds = HospitalManagement.getMedicines();
+        int count = HospitalManagement.getMedicineCount();
+        for (int i = 0; i < count; i++) {
+            Medicine m = meds[i];
+            medicines.add(new MedicineRow(m.getName(), m.getManufacturer(), 
+                         m.getExpiryDate(), m.getCost()));
         }
     }
 
     private void reloadLabs() {
         labs.clear();
-        Lab[] arr = HospitalManagement.getLabs();
-        int n = HospitalManagement.getLabCount();
-        for (int i = 0; i < n; i++) {
-            Lab l = arr[i];
+        Lab[] labArr = HospitalManagement.getLabs();
+        int count = HospitalManagement.getLabCount();
+        for (int i = 0; i < count; i++) {
+            Lab l = labArr[i];
             labs.add(new LabRow(l.getLab(), l.getCost()));
         }
     }
 
     private void reloadFacilities() {
         facilities.clear();
-        Facility[] arr = HospitalManagement.getFacilities();
-        int n = HospitalManagement.getFacilityCount();
-        for (int i = 0; i < n; i++) {
-            Facility f = arr[i];
+        Facility[] facArr = HospitalManagement.getFacilities();
+        int count = HospitalManagement.getFacilityCount();
+        for (int i = 0; i < count; i++) {
+            Facility f = facArr[i];
             facilities.add(new FacilityRow(f.getFacility()));
         }
     }
 
     private void reloadStaffs() {
         staffs.clear();
-        Staff[] arr = HospitalManagement.getStaffs();
-        int n = HospitalManagement.getStaffCount();
-        for (int i = 0; i < n; i++) {
-            Staff s = arr[i];
-
-            String designation =
-                (s.getDesignation() == null || s.getDesignation().trim().isEmpty())
-                    ? (s instanceof Nurse ? "Nurse" : s instanceof Pharmacist ? "Pharmacist" : s instanceof SecurityStaff ? "Security" : "Staff")
-                    : s.getDesignation();
-
-            String shift = "-";
-            String license = "-";
-            String clearance = "-";
-
-            if (s instanceof Nurse) shift = ((Nurse) s).getShift();
-            else if (s instanceof Pharmacist) license = ((Pharmacist) s).getLicenseNumber();
-            else if (s instanceof SecurityStaff) clearance = normalizeClearanceStrict(((SecurityStaff) s).getClearanceLevel());
-
-            staffs.add(new StaffRow(s.getId(), s.getName(), designation, shift, license, clearance, s.getSex(), s.getSalary()));
+        Staff[] staffArr = HospitalManagement.getStaffs();
+        int count = HospitalManagement.getStaffCount();
+        for (int i = 0; i < count; i++) {
+            Staff s = staffArr[i];
+            String shift = null;
+            String license = null;
+            String clearance = null;
+            
+            if (s instanceof Nurse) {
+                shift = ((Nurse) s).getShift();
+            } else if (s instanceof Pharmacist) {
+                license = ((Pharmacist) s).getLicenseNumber();
+            } else if (s instanceof SecurityStaff) {
+                clearance = ((SecurityStaff) s).getClearanceLevel();
+            }
+            
+            String designation = s.getDesignation();
+            if (designation == null || designation.trim().isEmpty()) {
+                if (s instanceof Nurse) designation = "Nurse";
+                else if (s instanceof Pharmacist) designation = "Pharmacist";
+                else if (s instanceof SecurityStaff) designation = "Security";
+                else designation = "Staff";
+            }
+            
+            staffs.add(new StaffRow(s.getId(), s.getName(), designation, 
+                      shift, license, clearance, s.getSex(), s.getSalary()));
         }
     }
 
-    // ===== Validation =====
-    private static String mustNonEmpty(String v, String label) {
-        if (v == null || v.trim().isEmpty()) throw new IllegalArgumentException(label + " cannot be empty.");
-        return v.trim();
+    // ====================== Doctors ======================
+    private BorderPane doctorsPane() {
+        TableView<DoctorRow> tv = new TableView<>(doctors);
+        styleTable(tv);
+        tv.getColumns().addAll(
+                col("ID", DoctorRow::getId),
+                col("Name", DoctorRow::getName),
+                col("Specialist", DoctorRow::getSpecialist),
+                col("Work Time", DoctorRow::getWorkTime),
+                col("Qualification", DoctorRow::getQualification),
+                col("Room No.", DoctorRow::getRoomFormatted)
+        );
+        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TextField tfId    = createStyledTextField("ID", 90);
+        TextField tfName  = createStyledTextField("Name", 140);
+        TextField tfSpec  = createStyledTextField("Specialist", 140);
+        TextField tfWork  = createStyledTextField("Work Time", 120);
+        TextField tfQual  = createStyledTextField("Qualification", 160);
+        TextField tfRoom  = createStyledTextField("Room No. (1-999)", 120);
+        Button add = createStyledButton("Add Doctor", "#4caf50");
+        
+        // Auto-uppercase for ID
+        tfId.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && !newVal.equals(newVal.toUpperCase())) {
+                tfId.setText(newVal.toUpperCase());
+            }
+        });
+        
+        add.setOnAction(e -> {
+            clearInvalidStates(tfId, tfName, tfSpec, tfWork, tfQual, tfRoom);
+            try {
+                String id   = validateNonEmpty(tfId.getText(), "ID", tfId);
+                validateDuplicateId(id, "Doctor", tfId);
+                String name = validateAndFormatName(tfName.getText(), "Name", tfName);
+                String sp   = validateAndFormatName(tfSpec.getText(), "Specialist", tfSpec);
+                String wt   = validateNonEmpty(tfWork.getText(), "Work Time", tfWork);
+                String q    = validateAndFormatName(tfQual.getText(), "Qualification", tfQual);
+                int room    = validateRoomNumber(tfRoom.getText(), tfRoom);
+                
+                Doctor d = new Doctor(id, name, sp, wt, q, room);
+                if (!HospitalManagement.addDoctor(d)) {
+                    showWarning("Doctor array is full in HospitalManagement.");
+                    return;
+                }
+                reloadDoctors(); 
+                tv.refresh();
+                clearFields(tfId, tfName, tfSpec, tfWork, tfQual, tfRoom);
+                showSuccess("Doctor added successfully!");
+            } catch (ValidationException ex) { 
+                showError(ex.getMessage()); 
+            }
+        });
+
+        VBox formContainer = createFormContainer(tfId, tfName, tfSpec, tfWork, tfQual, tfRoom, add);
+        BorderPane root = new BorderPane(tv);
+        root.setBottom(formContainer);
+        return root;
     }
-    private static int mustNonNegativeInt(String v, String label) {
+
+    // ====================== Patients ======================
+    private BorderPane patientsPane() {
+        TableView<PatientRow> tv = new TableView<>(patients);
+        styleTable(tv);
+        tv.getColumns().addAll(
+                col("ID", PatientRow::getId),
+                col("Name", PatientRow::getName),
+                col("Disease", PatientRow::getDisease),
+                col("Sex", PatientRow::getSex),
+                col("Admit Status", PatientRow::getAdmitStatus),
+                colInt("Age", PatientRow::getAge)
+        );
+        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TextField tfId   = createStyledTextField("ID", 90);
+        TextField tfName = createStyledTextField("Name", 140);
+        TextField tfDis  = createStyledTextField("Disease", 140);
+        ComboBox<String> cbSex = createStyledComboBox("Sex (M/F)", "M", "F");
+        TextField tfAdmit= createStyledTextField("Admit Status", 140);
+        TextField tfAge  = createStyledTextField("Age (0-150)", 90);
+        Button add = createStyledButton("Add Patient", "#2196f3");
+        
+        // Auto-uppercase for ID
+        tfId.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && !newVal.equals(newVal.toUpperCase())) {
+                tfId.setText(newVal.toUpperCase());
+            }
+        });
+        
+        add.setOnAction(e -> {
+            clearInvalidStates(tfId, tfName, tfDis, tfAdmit, tfAge);
+            clearInvalidComboBox(cbSex);
+            try {
+                String id   = validateNonEmpty(tfId.getText(), "ID", tfId);
+                validateDuplicateId(id, "Patient", tfId);
+                String name = validateAndFormatName(tfName.getText(), "Name", tfName);
+                String dis  = validateAndFormatName(tfDis.getText(), "Disease", tfDis);
+                String sex  = validateSex(cbSex.getValue(), cbSex);
+                String adm  = validateAndFormatName(tfAdmit.getText(), "Admit Status", tfAdmit);
+                int age     = validateAge(tfAge.getText(), tfAge);
+                
+                Patient p = new Patient(id, name, dis, sex, adm, age);
+                if (!HospitalManagement.addPatient(p)) {
+                    showWarning("Patient array is full in HospitalManagement.");
+                    return;
+                }
+                reloadPatients(); 
+                tv.refresh();
+                clearFields(tfId, tfName, tfDis, tfAdmit, tfAge); 
+                cbSex.getSelectionModel().clearSelection();
+                showSuccess("Patient added successfully!");
+            } catch (ValidationException ex) { 
+                showError(ex.getMessage()); 
+            }
+        });
+
+        VBox formContainer = createFormContainer(tfId, tfName, tfDis, cbSex, tfAdmit, tfAge, add);
+        BorderPane root = new BorderPane(tv);
+        root.setBottom(formContainer);
+        return root;
+    }
+
+    // ====================== Medicine ======================
+    private BorderPane medicinesPane() {
+        TableView<MedicineRow> tv = new TableView<>(medicines);
+        styleTable(tv);
+        tv.getColumns().addAll(
+                col("Name", MedicineRow::getName),
+                col("Manufacturer", MedicineRow::getManufacturer),
+                col("Expiry Date", MedicineRow::getExpiryDate),
+                colInt("Cost", MedicineRow::getCost)
+        );
+        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TextField tfName = createStyledTextField("Name", 160);
+        TextField tfManu = createStyledTextField("Manufacturer", 160);
+        TextField tfExp  = createStyledTextField("Expiry Date (YYYY-MM-DD)", 200);
+        TextField tfCost = createStyledTextField("Cost (1-10000)", 100);
+        Button add = createStyledButton("Add Medicine", "#ff9800");
+        
+        add.setOnAction(e -> {
+            clearInvalidStates(tfName, tfManu, tfExp, tfCost);
+            try {
+                String name = validateAndFormatName(tfName.getText(), "Name", tfName);
+                String manu = validateAndFormatName(tfManu.getText(), "Manufacturer", tfManu);
+                String exp  = validateDate(tfExp.getText(), tfExp);
+                int cost    = validateCost(tfCost.getText(), 1, 10000, tfCost);
+                
+                Medicine m = new Medicine(name, manu, exp, cost, 0);
+                if (!HospitalManagement.addMedicine(m)) {
+                    showWarning("Medicine array is full in HospitalManagement.");
+                    return;
+                }
+                reloadMedicines(); 
+                tv.refresh();
+                clearFields(tfName, tfManu, tfExp, tfCost);
+                showSuccess("Medicine added successfully!");
+            } catch (ValidationException ex) { 
+                showError(ex.getMessage()); 
+            }
+        });
+
+        VBox formContainer = createFormContainer(tfName, tfManu, tfExp, tfCost, add);
+        BorderPane root = new BorderPane(tv);
+        root.setBottom(formContainer);
+        return root;
+    }
+
+    // ====================== Labs ======================
+    private BorderPane labsPane() {
+        TableView<LabRow> tv = new TableView<>(labs);
+        styleTable(tv);
+        tv.getColumns().addAll(
+                col("Lab", LabRow::getLab), 
+                colInt("Cost", LabRow::getCost)
+        );
+        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TextField tfLab  = createStyledTextField("Lab", 200);
+        TextField tfCost = createStyledTextField("Cost (1-5000)", 120);
+        Button add = createStyledButton("Add Lab", "#9c27b0");
+        
+        add.setOnAction(e -> {
+            clearInvalidStates(tfLab, tfCost);
+            try {
+                String lab = validateAndFormatName(tfLab.getText(), "Lab", tfLab);
+                int cost   = validateCost(tfCost.getText(), 1, 5000, tfCost);
+                
+                Lab l = new Lab(lab, cost);
+                if (!HospitalManagement.addLab(l)) {
+                    showWarning("Lab array is full in HospitalManagement.");
+                    return;
+                }
+                reloadLabs(); 
+                tv.refresh();
+                clearFields(tfLab, tfCost);
+                showSuccess("Lab added successfully!");
+            } catch (ValidationException ex) { 
+                showError(ex.getMessage()); 
+            }
+        });
+
+        VBox formContainer = createFormContainer(tfLab, tfCost, add);
+        BorderPane root = new BorderPane(tv);
+        root.setBottom(formContainer);
+        return root;
+    }
+
+    // ====================== Facilities ======================
+    private BorderPane facilitiesPane() {
+        TableView<FacilityRow> tv = new TableView<>(facilities);
+        styleTable(tv);
+        tv.getColumns().addAll(col("Facility", FacilityRow::getFacility));
+        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TextField tfFac = createStyledTextField("Facility", 260);
+        Button add = createStyledButton("Add Facility", "#795548");
+        
+        add.setOnAction(e -> {
+            clearInvalidStates(tfFac);
+            try {
+                String f = validateAndFormatName(tfFac.getText(), "Facility", tfFac);
+                
+                Facility fac = new Facility(f);
+                if (!HospitalManagement.addFacility(fac)) {
+                    showWarning("Facility array is full in HospitalManagement.");
+                    return;
+                }
+                reloadFacilities(); 
+                tv.refresh();
+                clearFields(tfFac);
+                showSuccess("Facility added successfully!");
+            } catch (ValidationException ex) { 
+                showError(ex.getMessage()); 
+            }
+        });
+
+        VBox formContainer = createFormContainer(tfFac, add);
+        BorderPane root = new BorderPane(tv);
+        root.setBottom(formContainer);
+        return root;
+    }
+
+    // ====================== Staff ======================
+    private BorderPane staffPane() {
+        TableView<StaffRow> tv = new TableView<>(staffs);
+        styleTable(tv);
+        tv.getColumns().addAll(
+                col("ID", StaffRow::getId),
+                col("Name", StaffRow::getName),
+                col("Designation", StaffRow::getDesignation),
+                col("Shift", StaffRow::getShift),
+                col("License Number", StaffRow::getLicenseNumber),
+                col("Clearance Level", StaffRow::getClearanceLevel),
+                col("Sex", StaffRow::getSex),
+                colInt("Salary", StaffRow::getSalary)
+        );
+        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TextField tfId   = createStyledTextField("ID", 90);
+        TextField tfName = createStyledTextField("Name", 140);
+        ComboBox<String> cbDes = createStyledComboBox("Designation", "Nurse", "Pharmacist", "Security", "Generic Staff");
+        TextField tfCustomDes = createStyledTextField("Custom Designation", 150);
+        tfCustomDes.setDisable(true); // Initially disabled
+        ComboBox<String> cbSex = createStyledComboBox("Sex (M/F)", "M", "F");
+        TextField tfSalary = createStyledTextField("Salary (1000-50000)", 110);
+
+        TextField tfShift = createStyledTextField("Shift: Day/Night", 130);
+        TextField tfLic   = createStyledTextField("License Number", 160);
+        TextField tfClr   = createStyledTextField("Clearance: L1/L2/L3 or Low/Medium/High", 260);
+
+        // Auto-uppercase for ID
+        tfId.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && !newVal.equals(newVal.toUpperCase())) {
+                tfId.setText(newVal.toUpperCase());
+            }
+        });
+
+        // Set initial states and handle designation changes
+        cbDes.valueProperty().addListener((obs, o, n) -> {
+            String v = n == null ? "" : n;
+            tfShift.setDisable(!"Nurse".equals(v));
+            tfLic.setDisable(!"Pharmacist".equals(v));
+            tfClr.setDisable(!"Security".equals(v));
+            tfCustomDes.setDisable(!"Generic Staff".equals(v));
+            if ("Generic Staff".equals(v)) {
+                tfCustomDes.clear();
+            }
+        });
+        cbDes.getSelectionModel().select("Generic Staff");
+
+        Button add = createStyledButton("Add Staff", "#607d8b");
+        
+        add.setOnAction(e -> {
+            clearInvalidStates(tfId, tfName, tfSalary, tfShift, tfLic, tfClr, tfCustomDes);
+            clearInvalidComboBox(cbDes, cbSex);
+            try {
+                String id   = validateNonEmpty(tfId.getText(), "ID", tfId);
+                validateDuplicateId(id, "Staff", tfId);
+                String name = validateAndFormatName(tfName.getText(), "Name", tfName);
+                String des  = validateNonEmpty(cbDes.getValue(), "Designation", null);
+                String sex  = validateSex(cbSex.getValue(), cbSex);
+                int salary  = validateSalary(tfSalary.getText(), tfSalary);
+
+                Staff s;
+                switch (des) {
+                    case "Nurse":
+                        String shift = validateShift(tfShift.getText(), tfShift);
+                        s = new Nurse(id, name, sex, salary, shift);
+                        break;
+                    case "Pharmacist":
+                        String lic = validateNonEmpty(tfLic.getText(), "License Number", tfLic);
+                        s = new Pharmacist(id, name, sex, salary, lic);
+                        break;
+                    case "Security":
+                        String clr = validateClearanceLevel(tfClr.getText(), tfClr);
+                        s = new SecurityStaff(id, name, sex, salary, clr);
+                        break;
+                    case "Generic Staff":
+                        String customDes = validateAndFormatName(tfCustomDes.getText(), "Custom Designation", tfCustomDes);
+                        s = new Staff(id, name, customDes, sex, salary);
+                        break;
+                    default:
+                        s = new Staff(id, name, "Staff", sex, salary);
+                }
+
+                if (!HospitalManagement.addStaff(s)) { 
+                    showWarning("Staff array is full in HospitalManagement."); 
+                    return; 
+                }
+                reloadStaffs(); 
+                tv.refresh();
+
+                clearFields(tfId, tfName, tfSalary, tfShift, tfLic, tfClr, tfCustomDes);
+                cbDes.getSelectionModel().select("Generic Staff");
+                cbSex.getSelectionModel().clearSelection();
+                showSuccess("Staff added successfully!");
+            } catch (ValidationException ex) { 
+                showError(ex.getMessage()); 
+            }
+        });
+
+        VBox formContainer = createFormContainer(tfId, tfName, cbDes, tfCustomDes, cbSex, tfSalary, tfShift, tfLic, tfClr, add);
+        BorderPane root = new BorderPane(tv);
+        root.setBottom(formContainer);
+        return root;
+    }
+
+    // ===== Enhanced UI helpers =====
+    private TextField createStyledTextField(String prompt, double prefW) {
+        TextField tf = new TextField();
+        tf.setPromptText(prompt);
+        tf.setPrefWidth(prefW);
+        tf.setStyle(
+            "-fx-background-color: rgba(255,255,255,0.9);" +
+            "-fx-background-radius: 8;" +
+            "-fx-border-color: #e0e0e0;" +
+            "-fx-border-radius: 8;" +
+            "-fx-border-width: 1;" +
+            "-fx-padding: 8;" +
+            "-fx-font-size: 13;"
+        );
+        
+        // Store original style
+        tf.getProperties().put("originalStyle", tf.getStyle());
+        
+        // Add focus effects
+        tf.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            String currentStyle = (String) tf.getProperties().get("originalStyle");
+            if (newVal) {
+                tf.setStyle(currentStyle + "-fx-border-color: #2196f3; -fx-border-width: 2;");
+            } else {
+                tf.setStyle(currentStyle);
+            }
+        });
+        
+        return tf;
+    }
+
+    private ComboBox<String> createStyledComboBox(String prompt, String... items) {
+        ComboBox<String> cb = new ComboBox<>(FXCollections.observableArrayList(items));
+        cb.setPromptText(prompt);
+        cb.setPrefWidth(110);
+        cb.setStyle(
+            "-fx-background-color: rgba(255,255,255,0.9);" +
+            "-fx-background-radius: 8;" +
+            "-fx-border-color: #e0e0e0;" +
+            "-fx-border-radius: 8;" +
+            "-fx-border-width: 1;" +
+            "-fx-font-size: 13;"
+        );
+        
+        // Store original style
+        cb.getProperties().put("originalStyle", cb.getStyle());
+        
+        return cb;
+    }
+
+    private Button createStyledButton(String text, String color) {
+        Button btn = new Button(text);
+        btn.setMinWidth(120);
+        btn.setStyle(
+            "-fx-background-color: " + color + ";" +
+            "-fx-text-fill: white;" +
+            "-fx-background-radius: 8;" +
+            "-fx-border-radius: 8;" +
+            "-fx-padding: 10 20;" +
+            "-fx-font-size: 13;" +
+            "-fx-font-weight: bold;" +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 3, 0, 0, 1);"
+        );
+        
+        // Add hover effects
+        btn.setOnMouseEntered(e -> {
+            btn.setStyle(btn.getStyle() + "-fx-scale-x: 1.05; -fx-scale-y: 1.05;");
+        });
+        btn.setOnMouseExited(e -> {
+            btn.setStyle(btn.getStyle().replace("-fx-scale-x: 1.05; -fx-scale-y: 1.05;", ""));
+        });
+        
+        return btn;
+    }
+
+    private VBox createFormContainer(javafx.scene.Node... nodes) {
+        // Create rows of form elements (max 4 per row for better layout)
+        VBox container = new VBox(10);
+        HBox currentRow = new HBox(10);
+        int itemsInRow = 0;
+        
+        for (javafx.scene.Node node : nodes) {
+            if (itemsInRow >= 4 || (node instanceof Button)) {
+                if (currentRow.getChildren().size() > 0) {
+                    currentRow.setAlignment(Pos.CENTER_LEFT);
+                    container.getChildren().add(currentRow);
+                }
+                currentRow = new HBox(10);
+                itemsInRow = 0;
+            }
+            
+            currentRow.getChildren().add(node);
+            if (node instanceof TextField || node instanceof ComboBox) {
+                HBox.setHgrow(node, Priority.SOMETIMES);
+                itemsInRow++;
+            } else if (node instanceof Button) {
+                HBox buttonRow = new HBox(currentRow);
+                buttonRow.setAlignment(Pos.CENTER);
+                container.getChildren().add(buttonRow);
+                currentRow = new HBox(10);
+                itemsInRow = 0;
+            }
+        }
+        
+        if (currentRow.getChildren().size() > 0) {
+            currentRow.setAlignment(Pos.CENTER_LEFT);
+            container.getChildren().add(currentRow);
+        }
+        
+        container.setPadding(new Insets(15));
+        container.setStyle(
+            "-fx-background-color: rgba(250,250,250,0.9);" +
+            "-fx-background-radius: 10;" +
+            "-fx-border-color: #e0e0e0;" +
+            "-fx-border-radius: 10;" +
+            "-fx-border-width: 1;"
+        );
+        
+        return container;
+    }
+
+    private void styleTable(TableView<?> table) {
+        table.setStyle(
+            "-fx-background-color: rgba(255,255,255,0.95);" +
+            "-fx-background-radius: 10;" +
+            "-fx-border-color: #e0e0e0;" +
+            "-fx-border-radius: 10;" +
+            "-fx-border-width: 1;"
+        );
+    }
+
+    // ===== Invalid state management =====
+    private void setInvalidState(TextField tf) {
+        if (tf != null) {
+            tf.setStyle(
+                "-fx-background-color: rgba(255,255,255,0.9);" +
+                "-fx-background-radius: 8;" +
+                "-fx-border-color: #f44336;" +
+                "-fx-border-radius: 8;" +
+                "-fx-border-width: 2;" +
+                "-fx-padding: 8;" +
+                "-fx-font-size: 13;"
+            );
+        }
+    }
+    
+    private void clearInvalidState(TextField tf) {
+        if (tf != null) {
+            String originalStyle = (String) tf.getProperties().get("originalStyle");
+            if (originalStyle != null) {
+                tf.setStyle(originalStyle);
+            }
+        }
+    }
+    
+    private void setInvalidState(ComboBox<String> cb) {
+        if (cb != null) {
+            cb.setStyle(
+                "-fx-background-color: rgba(255,255,255,0.9);" +
+                "-fx-background-radius: 8;" +
+                "-fx-border-color: #f44336;" +
+                "-fx-border-radius: 8;" +
+                "-fx-border-width: 2;" +
+                "-fx-font-size: 13;"
+            );
+        }
+    }
+    
+    private void clearInvalidState(ComboBox<String> cb) {
+        if (cb != null) {
+            String originalStyle = (String) cb.getProperties().get("originalStyle");
+            if (originalStyle != null) {
+                cb.setStyle(originalStyle);
+            }
+        }
+    }
+    
+    private void clearInvalidStates(TextField... fields) {
+        for (TextField tf : fields) {
+            clearInvalidState(tf);
+        }
+    }
+    
+    private void clearInvalidComboBox(ComboBox<String>... comboBoxes) {
+        for (ComboBox<String> cb : comboBoxes) {
+            clearInvalidState(cb);
+        }
+    }
+
+    // ===== Enhanced Validation Methods =====
+    private String validateNonEmpty(String value, String fieldName, TextField field) throws ValidationException {
+        if (value == null || value.trim().isEmpty()) {
+            if (field != null) setInvalidState(field);
+            throw new ValidationException(fieldName + " cannot be empty.");
+        }
+        if (field != null) clearInvalidState(field);
+        return value.trim();
+    }
+
+    private String validateAndFormatName(String value, String fieldName, TextField field) throws ValidationException {
+        String trimmed = validateNonEmpty(value, fieldName, field);
+        if (trimmed.matches(".*[0-9].*")) {
+            if (field != null) setInvalidState(field);
+            throw new ValidationException(fieldName + " should not contain numbers.");
+        }
+        if (field != null) clearInvalidState(field);
+        return HospitalManagement.formatText(trimmed);
+    }
+
+    private int validateAge(String value, TextField field) throws ValidationException {
         try {
-            int x = Integer.parseInt(mustNonEmpty(v, label));
-            if (x < 0) throw new IllegalArgumentException(label + " must be >= 0.");
-            return x;
+            int age = Integer.parseInt(validateNonEmpty(value, "Age", field));
+            if (age < 0 || age > 150) {
+                if (field != null) setInvalidState(field);
+                throw new ValidationException("Age must be between 0 and 150.");
+            }
+            if (field != null) clearInvalidState(field);
+            return age;
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(label + " must be a valid number.");
+            if (field != null) setInvalidState(field);
+            throw new ValidationException("Age must be a valid number.");
         }
     }
-    private static String mustSex(String v) {
-        if ("M".equalsIgnoreCase(v)) return "M";
-        if ("F".equalsIgnoreCase(v)) return "F";
-        throw new IllegalArgumentException("Invalid Sex. Please choose M or F.");
-    }
-    private static String mustShift(String v) {
-        String s = mustNonEmpty(v, "Shift").toLowerCase();
-        if (s.startsWith("d")) return "Day";
-        if (s.startsWith("n")) return "Night";
-        throw new IllegalArgumentException("Invalid Shift. Please enter Day or Night.");
-    }
-    private static String normalizeClearanceStrict(String v) {
-        String s = mustNonEmpty(v, "Clearance").toUpperCase();
-        if ("L1".equals(s) || "LOW".equals(s)) return "Low";
-        if ("L2".equals(s) || "MEDIUM".equals(s)) return "Medium";
-        if ("L3".equals(s) || "HIGH".equals(s)) return "High";
-        throw new IllegalArgumentException("Invalid Clearance. Use L1/L2/L3 or Low/Medium/High.");
-    }
 
-    private static void error(String msg) { new Alert(Alert.AlertType.ERROR, msg).showAndWait(); }
-    private static void warn(String msg)  { new Alert(Alert.AlertType.WARNING, msg).showAndWait(); }
-    private static void clear(TextField... fields) { for (TextField f : fields) f.clear(); }
-
-    // ===== Small table helpers =====
-    private <T> TableColumn<T, String> col(String title, java.util.function.Function<T, String> f) {
-        TableColumn<T, String> c = new TableColumn<>(title);
-        c.setCellValueFactory(d -> new SimpleStringProperty(f.apply(d.getValue())));
-        return c;
-    }
-    private <T> TableColumn<T, Number> colInt(String title, java.util.function.ToIntFunction<T> f) {
-        TableColumn<T, Number> c = new TableColumn<>(title);
-        c.setCellValueFactory(d -> new SimpleIntegerProperty(f.applyAsInt(d.getValue())));
-        return c;
-    }
-
-    // ===== Row DTOs =====
-    public static class DoctorRow {
-        final String id, name, specialist, workTime, qualification; final int room;
-        DoctorRow(String id, String name, String sp, String wt, String q, int room) {
-            this.id=id; this.name=name; this.specialist=sp; this.workTime=wt; this.qualification=q; this.room=room;
+    private int validateRoomNumber(String value, TextField field) throws ValidationException {
+        try {
+            int room = Integer.parseInt(validateNonEmpty(value, "Room Number", field));
+            if (room < 1 || room > 999) {
+                if (field != null) setInvalidState(field);
+                throw new ValidationException("Room number must be between 1 and 999.");
+            }
+            if (field != null) clearInvalidState(field);
+            return room;
+        } catch (NumberFormatException e) {
+            if (field != null) setInvalidState(field);
+            throw new ValidationException("Room number must be a valid number.");
         }
-        String id(){return id;} String name(){return name;} String specialist(){return specialist;}
-        String workTime(){return workTime;} String qualification(){return qualification;} int room(){return room;}
-    }
-    public static class PatientRow {
-        final String id, name, disease, sex, admitStatus; final int age;
-        PatientRow(String id, String name, String d, String sex, String a, int age){
-            this.id=id; this.name=name; this.disease=d; this.sex=sex; this.admitStatus=a; this.age=age;
-        }
-        String id(){return id;} String name(){return name;} String disease(){return disease;}
-        String sex(){return sex;} String admitStatus(){return admitStatus;} int age(){return age;}
-    }
-    public static class MedicineRow {
-        final String name, manufacturer, expiryDate; final int cost;
-        MedicineRow(String n,String m,String e,int c){name=n; manufacturer=m; expiryDate=e; cost=c;}
-        String name(){return name;} String manufacturer(){return manufacturer;} String expiryDate(){return expiryDate;} int cost(){return cost;}
-    }
-    public static class LabRow {
-        final String lab; final int cost;
-        LabRow(String l,int c){lab=l; cost=c;}
-        String lab(){return lab;} int cost(){return cost;}
-    }
-    public static class FacilityRow {
-        final String facility;
-        FacilityRow(String f){facility=f;}
-        String facility(){return facility;}
-    }
-    public static class StaffRow {
-        final String id,name,designation,shift,licenseNumber,clearanceLevel,sex; final int salary;
-        StaffRow(String id,String name,String des,String shift,String lic,String clr,String sex,int sal){
-            this.id=id; this.name=name; this.designation=des; this.shift=shift; this.licenseNumber=lic; this.clearanceLevel=clr; this.sex=sex; this.salary=sal;
-        }
-        String id(){return id;} String name(){return name;} String designation(){return designation;}
-        String shift(){return shift;} String licenseNumber(){return licenseNumber;} String clearanceLevel(){return clearanceLevel;}
-        String sex(){return sex;} int salary(){return salary;}
     }
 
-    public static void main(String[] args) { launch(args); }
+    private int validateCost(String value, int min, int max, TextField field) throws ValidationException {
+        try {
+            int cost = Integer.parseInt(validateNonEmpty(value, "Cost", field));
+            if (cost < min || cost > max) {
+                if (field != null) setInvalidState(field);
+                throw new ValidationException("Cost must be between " + min + " and " + max + ".");
+            }
+            if (field != null) clearInvalidState(field);
+            return cost;
+        } catch (NumberFormatException e) {
+            if (field != null) setInvalidState(field);
+            throw new ValidationException("Cost must be a valid number.");
+        }
+    }
+
+    private int validateSalary(String value, TextField field) throws ValidationException {
+        try {
+            int salary = Integer.parseInt(validateNonEmpty(value, "Salary", field));
+            if (salary < 1000 || salary > 50000) {
+                if (field != null) setInvalidState(field);
+                throw new ValidationException("Salary must be between 1000 and 50000.");
+            }
+            if (field != null) clearInvalidState(field);
+            return salary;
+        } catch (NumberFormatException e) {
+            if (field != null) setInvalidState(field);
+            throw new ValidationException("Salary must be a valid number.");
+        }
+    }
+
+    private String validateSex(String value, ComboBox<String> field) throws ValidationException {
+        if (value == null || (!value.equals("M") && !value.equals("F"))) {
+            if (field != null) setInvalidState(field);
+            throw new ValidationException("Please select M or F for sex.");
+        }
+        if (field != null) clearInvalidState(field);
+        return value;
+    }
+
+    private String validateShift(String value, TextField field) throws ValidationException {
+        if (value == null || value.trim().isEmpty()) {
+            if (field != null) setInvalidState(field);
+            throw new ValidationException("Shift cannot be empty for Nurse.");
+        }
+        String normalized = HospitalManagement.normalizeShift(value.trim());
+        if (!normalized.equals("Day") && !normalized.equals("Night")) {
+            if (field != null) setInvalidState(field);
+            throw new ValidationException("Shift must be Day or Night.");
+        }
+        if (field != null) clearInvalidState(field);
+        return normalized;
+    }
+
+    private String validateClearanceLevel(String value, TextField field) throws ValidationException {
+        if (value == null || value.trim().isEmpty()) {
+            if (field != null) setInvalidState(field);
+            throw new ValidationException("Clearance Level cannot be empty for Security.");
+        }
+        String normalized = HospitalManagement.normalizeClearanceLevel(value.trim());
+        if (!normalized.equals("Low") && !normalized.equals("Medium") && !normalized.equals("High")) {
+            if (field != null) setInvalidState(field);
+            throw new ValidationException("Clearance Level must be Low, Medium, High, L1, L2, or L3.");
+        }
+        if (field != null) clearInvalidState(field);
+        return normalized;
+    }
+
+    private String validateDate(String value, TextField field) throws ValidationException {
+        try {
+            String date = validateNonEmpty(value, "Date", field);
+            if (!date.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                if (field != null) setInvalidState(field);
+                throw new ValidationException("Date format must be YYYY-MM-DD.");
+            }
+            String[] parts = date.split("-");
+            int year = Integer.parseInt(parts[0]);
+            int month = Integer.parseInt(parts[1]);
+            int day = Integer.parseInt(parts[2]);
+            
+            if (year < 2000 || year > 2030) {
+                if (field != null) setInvalidState(field);
+                throw new ValidationException("Year must be between 2000 and 2030.");
+            }
+            if (month < 1 || month > 12) {
+                if (field != null) setInvalidState(field);
+                throw new ValidationException("Month must be between 1 and 12.");
+            }
+            if (day < 1 || day > 31) {
+                if (field != null) setInvalidState(field);
+                throw new ValidationException("Day must be between 1 and 31.");
+            }
+            if (field != null) clearInvalidState(field);
+            return date;
+        } catch (NumberFormatException e) {
+            if (field != null) setInvalidState(field);
+            throw new ValidationException("Invalid date format. Use YYYY-MM-DD.");
+        }
+    }
+
+    private void validateDuplicateId(String id, String entityType, TextField field) throws ValidationException {
+        boolean isDuplicate = false;
+        
+        if ("Doctor".equals(entityType)) {
+            Doctor[] docs = HospitalManagement.getDoctors();
+            int count = HospitalManagement.getDoctorCount();
+            for (int i = 0; i < count; i++) {
+                if (docs[i].getId().equalsIgnoreCase(id)) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+        } else if ("Patient".equals(entityType)) {
+            Patient[] pts = HospitalManagement.getPatients();
+            int count = HospitalManagement.getPatientCount();
+            for (int i = 0; i < count; i++) {
+                if (pts[i].getId().equalsIgnoreCase(id)) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+        } else if ("Staff".equals(entityType)) {
+            Staff[] stfs = HospitalManagement.getStaffs();
+            int count = HospitalManagement.getStaffCount();
+            for (int i = 0; i < count; i++) {
+                if (stfs[i].getId().equalsIgnoreCase(id)) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+        }
+        
+        if (isDuplicate) {
+            if (field != null) setInvalidState(field);
+            throw new ValidationException("ID already exists. Please enter a unique ID.");
+        }
+    }
+
+    // ===== Alert helpers =====
+    private void showSuccess(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Success");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showWarning(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Warning");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    // ===== Clear fields helper =====
+    private void clearFields(TextField... fields) {
+        for (TextField tf : fields) {
+            if (tf != null) {
+                tf.clear();
+            }
+        }
+    }
+
+    // ===== Main method for JavaFX =====
+    public static void main(String[] args) {
+        launch(args);
+    }
 }

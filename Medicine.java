@@ -8,8 +8,8 @@ public class Medicine {
     public Medicine() {}
 
     public Medicine(String name, String manufacturer, String expiryDate, int cost, int count) {
-        this.name = name;
-        this.manufacturer = manufacturer;
+        this.name = HospitalManagement.formatText(name);
+        this.manufacturer = HospitalManagement.formatText(manufacturer);
         this.expiryDate = expiryDate;
         this.cost = cost;
         this.count = count;
@@ -17,10 +17,19 @@ public class Medicine {
 
     public void newMedicine() {
         System.out.println("\n-- New Medicine --");
-        this.name = HospitalManagement.readNonEmpty("Enter Medicine Name: ");
-        this.manufacturer = HospitalManagement.readNonEmpty("Enter Manufacturer: ");
-        this.expiryDate = HospitalManagement.readNonEmpty("Enter Expiry Date (YYYY-MM-DD): ");
-        this.cost = HospitalManagement.readIntNonNegative("Enter Cost (>=0): ");
+        this.name = HospitalManagement.validateAndReadString("Enter Medicine Name: ", "Medicine Name");
+        this.manufacturer = HospitalManagement.validateAndReadString("Enter Manufacturer: ", "Manufacturer");
+        this.expiryDate = HospitalManagement.validateDate("Enter Expiry Date (YYYY-MM-DD): ");
+        
+        // Validate cost range
+        while (true) {
+            this.cost = HospitalManagement.readIntNonNegative("Enter Cost (1-10000): ");
+            if (this.cost >= 1 && this.cost <= 10000) {
+                break;
+            }
+            System.out.println("Cost should be between 1 and 10000.");
+        }
+        
         this.count = HospitalManagement.readIntNonNegative("Enter Unit Count (>=0): ");
     }
 
@@ -48,8 +57,8 @@ public class Medicine {
     public String getExpiryDate() { return expiryDate; }
     public int getCost() { return cost; }
     public int getCount() { return count; }
-    public void setName(String name) { this.name = name; }
-    public void setManufacturer(String manufacturer) { this.manufacturer = manufacturer; }
+    public void setName(String name) { this.name = HospitalManagement.formatText(name); }
+    public void setManufacturer(String manufacturer) { this.manufacturer = HospitalManagement.formatText(manufacturer); }
     public void setExpiryDate(String expiryDate) { this.expiryDate = expiryDate; }
     public void setCost(int cost) { this.cost = cost; }
     public void setCount(int count) { this.count = count; }

@@ -9,19 +9,35 @@ public class Staff {
 
     public Staff(String id, String name, String designation, String sex, int salary) {
         this.id = id;
-        this.name = name;
-        this.designation = designation;
+        this.name = HospitalManagement.formatText(name);
+        this.designation = HospitalManagement.formatText(designation);
         this.sex = sex;
         this.salary = salary;
     }
 
     public void newStaff() {
         System.out.println("\n-- New Staff --");
-        this.id = HospitalManagement.readNonEmpty("Enter Staff ID: ");
-        this.name = HospitalManagement.readNonEmpty("Enter Name: ");
-        this.designation = HospitalManagement.readNonEmpty("Enter Designation: ");
+        
+        // Get existing staff IDs for duplicate check
+        String[] existingIDs = new String[HospitalManagement.getStaffCount()];
+        Staff[] staffs = HospitalManagement.getStaffs();
+        for (int i = 0; i < HospitalManagement.getStaffCount(); i++) {
+            existingIDs[i] = staffs[i].getId();
+        }
+        
+        this.id = HospitalManagement.validateAndFormatID("Enter Staff ID: ", existingIDs, HospitalManagement.getStaffCount());
+        this.name = HospitalManagement.validateAndReadString("Enter Name: ", "Name");
+        this.designation = HospitalManagement.validateAndReadString("Enter Designation: ", "Designation");
         this.sex = HospitalManagement.readSex();
-        this.salary = HospitalManagement.readIntNonNegative("Enter Salary (>=0): ");
+        
+        // Validate salary range
+        while (true) {
+            this.salary = HospitalManagement.readIntNonNegative("Enter Salary (1000-50000): ");
+            if (this.salary >= 1000 && this.salary <= 50000) {
+                break;
+            }
+            System.out.println("Salary should be between 1000 and 50000.");
+        }
     }
 
     public static void showStaffInfo(Staff[] staffs, int count) {
@@ -76,8 +92,8 @@ public class Staff {
     public String getSex() { return sex; }
     public int getSalary() { return salary; }
     public void setId(String id) { this.id = id; }
-    public void setName(String name) { this.name = name; }
-    public void setDesignation(String designation) { this.designation = designation; }
+    public void setName(String name) { this.name = HospitalManagement.formatText(name); }
+    public void setDesignation(String designation) { this.designation = HospitalManagement.formatText(designation); }
     public void setSex(String sex) { this.sex = sex; }
     public void setSalary(int salary) { this.salary = salary; }
 }

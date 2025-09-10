@@ -10,21 +10,37 @@ public class Patient {
 
     public Patient(String id, String name, String disease, String sex, String admitStatus, int age) {
         this.id = id;
-        this.name = name;
-        this.disease = disease;
+        this.name = HospitalManagement.formatText(name);
+        this.disease = HospitalManagement.formatText(disease);
         this.sex = sex;
-        this.admitStatus = admitStatus;
+        this.admitStatus = HospitalManagement.formatText(admitStatus);
         this.age = age;
     }
 
     public void newPatient() {
         System.out.println("\n-- New Patient --");
-        this.id = HospitalManagement.readNonEmpty("Enter Patient ID: ");
-        this.name = HospitalManagement.readNonEmpty("Enter Name: ");
-        this.disease = HospitalManagement.readNonEmpty("Enter Disease: ");
+        
+        // Get existing patient IDs for duplicate check
+        String[] existingIDs = new String[HospitalManagement.getPatientCount()];
+        Patient[] patients = HospitalManagement.getPatients();
+        for (int i = 0; i < HospitalManagement.getPatientCount(); i++) {
+            existingIDs[i] = patients[i].getId();
+        }
+        
+        this.id = HospitalManagement.validateAndFormatID("Enter Patient ID: ", existingIDs, HospitalManagement.getPatientCount());
+        this.name = HospitalManagement.validateAndReadString("Enter Name: ", "Name");
+        this.disease = HospitalManagement.validateAndReadString("Enter Disease: ", "Disease");
         this.sex = HospitalManagement.readSex();
-        this.admitStatus = HospitalManagement.readNonEmpty("Enter Admit Status: ");
-        this.age = HospitalManagement.readIntNonNegative("Enter Age (>=0): ");
+        this.admitStatus = HospitalManagement.validateAndReadString("Enter Admit Status: ", "Admit Status");
+        
+        // Validate age range
+        while (true) {
+            this.age = HospitalManagement.readIntNonNegative("Enter Age (0-150): ");
+            if (this.age >= 0 && this.age <= 150) {
+                break;
+            }
+            System.out.println("Age should be between 0 and 150.");
+        }
     }
 
     public static void showPatientInfo(Patient[] patients, int count) {
@@ -55,9 +71,9 @@ public class Patient {
     public String getAdmitStatus() { return admitStatus; }
     public int getAge() { return age; }
     public void setId(String id) { this.id = id; }
-    public void setName(String name) { this.name = name; }
-    public void setDisease(String disease) { this.disease = disease; }
+    public void setName(String name) { this.name = HospitalManagement.formatText(name); }
+    public void setDisease(String disease) { this.disease = HospitalManagement.formatText(disease); }
     public void setSex(String sex) { this.sex = sex; }
-    public void setAdmitStatus(String admitStatus) { this.admitStatus = admitStatus; }
+    public void setAdmitStatus(String admitStatus) { this.admitStatus = HospitalManagement.formatText(admitStatus); }
     public void setAge(int age) { this.age = age; }
 }

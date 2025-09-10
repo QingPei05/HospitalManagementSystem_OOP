@@ -4,12 +4,12 @@ public class Facility {
     public Facility() {}
 
     public Facility(String facility) {
-        this.facility = facility;
+        this.facility = HospitalManagement.formatText(facility);
     }
 
     public void newFacility() {
         System.out.println("\n-- New Facility --");
-        this.facility = HospitalManagement.readNonEmpty("Enter Facility: ");
+        this.facility = HospitalManagement.validateAndReadString("Enter Facility: ", "Facility");
     }
 
     public static void showFacility(Facility[] facilities, int count) {
@@ -27,5 +27,5 @@ public class Facility {
     }
 
     public String getFacility() { return facility; }
-    public void setFacility(String facility) { this.facility = facility; }
+    public void setFacility(String facility) { this.facility = HospitalManagement.formatText(facility); }
 }

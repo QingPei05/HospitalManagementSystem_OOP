@@ -10,21 +10,37 @@ public class Doctor {
 
     public Doctor(String id, String name, String specialist, String workTime, String qualification, int room) {
         this.id = id;
-        this.name = name;
-        this.specialist = specialist;
+        this.name = HospitalManagement.formatText(name);
+        this.specialist = HospitalManagement.formatText(specialist);
         this.workTime = workTime;
-        this.qualification = qualification;
+        this.qualification = HospitalManagement.formatText(qualification);
         this.room = room;
     }
 
     public void newDoctor() {
         System.out.println("\n-- New Doctor --");
-        this.id = HospitalManagement.readNonEmpty("Enter Doctor ID: ");
-        this.name = HospitalManagement.readNonEmpty("Enter Name: ");
-        this.specialist = HospitalManagement.readNonEmpty("Enter Specialist: ");
+        
+        // Get existing doctor IDs for duplicate check
+        String[] existingIDs = new String[HospitalManagement.getDoctorCount()];
+        Doctor[] doctors = HospitalManagement.getDoctors();
+        for (int i = 0; i < HospitalManagement.getDoctorCount(); i++) {
+            existingIDs[i] = doctors[i].getId();
+        }
+        
+        this.id = HospitalManagement.validateAndFormatID("Enter Doctor ID: ", existingIDs, HospitalManagement.getDoctorCount());
+        this.name = HospitalManagement.validateAndReadString("Enter Name: ", "Name");
+        this.specialist = HospitalManagement.validateAndReadString("Enter Specialist: ", "Specialist");
         this.workTime = HospitalManagement.readNonEmpty("Enter Work Time (Ex. 8am-10am): ");
-        this.qualification = HospitalManagement.readNonEmpty("Enter Qualification: ");
-        this.room = HospitalManagement.readIntNonNegative("Enter Room No (>=0): ");
+        this.qualification = HospitalManagement.validateAndReadString("Enter Qualification: ", "Qualification");
+        
+        // Validate room number range
+        while (true) {
+            this.room = HospitalManagement.readIntNonNegative("Enter Room No (1-999): ");
+            if (this.room >= 1 && this.room <= 999) {
+                break;
+            }
+            System.out.println("Room number should be between 1 and 999.");
+        }
     }
 
     public static void showDoctorInfo(Doctor[] doctors, int count) {
@@ -37,7 +53,7 @@ public class Doctor {
                 "ID", "Name", "Specialist", "Work Time", "Qualification", "Room No.");
         HospitalManagement.printSeparator(6, 18, 15, 12, 18, 8);
         for (int i = 0; i < count; i++) {
-            System.out.printf("%-6s %-18s %-15s %-12s %-18s %-8d\n",
+            System.out.printf("%-6s %-18s %-15s %-12s %-18s %03d\n",
                     doctors[i].getId(),
                     HospitalManagement.truncateString(doctors[i].getName(), 18),
                     HospitalManagement.truncateString(doctors[i].getSpecialist(), 15),
@@ -55,9 +71,9 @@ public class Doctor {
     public String getQualification() { return qualification; }
     public int getRoom() { return room; }
     public void setId(String id) { this.id = id; }
-    public void setName(String name) { this.name = name; }
-    public void setSpecialist(String specialist) { this.specialist = specialist; }
+    public void setName(String name) { this.name = HospitalManagement.formatText(name); }
+    public void setSpecialist(String specialist) { this.specialist = HospitalManagement.formatText(specialist); }
     public void setWorkTime(String workTime) { this.workTime = workTime; }
-    public void setQualification(String qualification) { this.qualification = qualification; }
+    public void setQualification(String qualification) { this.qualification = HospitalManagement.formatText(qualification); }
     public void setRoom(int room) { this.room = room; }
 }

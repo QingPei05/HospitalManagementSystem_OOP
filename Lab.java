@@ -5,14 +5,22 @@ public class Lab {
     public Lab() {}
 
     public Lab(String lab, int cost) {
-        this.lab = lab;
+    	this.lab = HospitalManagement.formatText(lab);
         this.cost = cost;
     }
 
     public void newLab() {
         System.out.println("\n-- New Lab --");
-        this.lab = HospitalManagement.readNonEmpty("Enter Lab: ");
-        this.cost = HospitalManagement.readIntNonNegative("Enter Cost (>=0): ");
+        this.lab = HospitalManagement.validateAndReadString("Enter Lab: ", "Lab");
+        
+        // Validate cost range
+        while (true) {
+            this.cost = HospitalManagement.readIntNonNegative("Enter Cost (1-5000): ");
+            if (this.cost >= 1 && this.cost <= 5000) {
+                break;
+            }
+            System.out.println("Lab cost should be between 1 and 5000.");
+        }
     }
 
     public static void labList(Lab[] labs, int count) {
@@ -32,6 +40,6 @@ public class Lab {
 
     public String getLab() { return lab; }
     public int getCost() { return cost; }
-    public void setLab(String lab) { this.lab = lab; }
+    public void setLab(String lab) { this.lab = HospitalManagement.formatText(lab); }
     public void setCost(int cost) { this.cost = cost; }
 }

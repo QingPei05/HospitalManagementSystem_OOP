@@ -182,6 +182,101 @@ public class HospitalManagement {
                 return v.substring(0,1).toUpperCase() + v.substring(1).toLowerCase();
         }
     }
+    
+    public static String formatText(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return text;
+        }
+        
+        String trimmed = text.trim();
+        StringBuilder formatted = new StringBuilder();
+        boolean capitalizeNext = true;
+        
+        for (int i = 0; i < trimmed.length(); i++) {
+            char ch = trimmed.charAt(i);
+            if (capitalizeNext && Character.isLetter(ch)) {
+                formatted.append(Character.toUpperCase(ch));
+                capitalizeNext = false;
+            } else if (ch == ' ') {
+                formatted.append(ch);
+                capitalizeNext = true;
+            } else {
+                formatted.append(Character.toLowerCase(ch));
+            }
+        }
+        
+        return formatted.toString();
+    }
+    
+    public static String validateAndFormatID(String prompt, String[] existingIDs, int count) {
+        while (true) {
+            try {
+                String id = readNonEmpty(prompt).toUpperCase(); // Convert to uppercase
+                // Check for duplicate IDs (case-insensitive)
+                for (int i = 0; i < count; i++) {
+                    if (existingIDs[i] != null && existingIDs[i].equalsIgnoreCase(id)) {
+                        System.out.println("ID already exists! Please enter a unique ID.");
+                        id = null;
+                        break;
+                    }
+                }
+                if (id != null) return id;
+            } catch (Exception e) {
+                System.out.println("Error reading ID: " + e.getMessage());
+            }
+        }
+    }
+    
+    public static String validateAndReadString(String prompt, String fieldName) {
+        while (true) {
+            try {
+                String input = readNonEmpty(prompt);
+                if (input.matches(".*[0-9].*")) {
+                    System.out.println(fieldName + " should not contain numbers.");
+                    continue;
+                }
+                // Format text with proper capitalization
+                return formatText(input);
+            } catch (Exception e) {
+                System.out.println("Error reading input: " + e.getMessage());
+            }
+        }
+    }
+
+    public static String validateDate(String prompt) {
+        while (true) {
+            try {
+                String date = readNonEmpty(prompt);
+                // Basic date format validation (YYYY-MM-DD)
+                if (!date.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                    System.out.println("Invalid date format. Please use YYYY-MM-DD format.");
+                    continue;
+                }
+                String[] parts = date.split("-");
+                int year = Integer.parseInt(parts[0]);
+                int month = Integer.parseInt(parts[1]);
+                int day = Integer.parseInt(parts[2]);
+                
+                if (year < 2000 || year > 2030) {
+                    System.out.println("Year should be between 2000 and 2030.");
+                    continue;
+                }
+                if (month < 1 || month > 12) {
+                    System.out.println("Month should be between 1 and 12.");
+                    continue;
+                }
+                if (day < 1 || day > 31) {
+                    System.out.println("Day should be between 1 and 31.");
+                    continue;
+                }
+                return date;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid date format. Please use YYYY-MM-DD format.");
+            } catch (Exception e) {
+                System.out.println("Error reading date: " + e.getMessage());
+            }
+        }
+    }
 
     // ===== Formatting helpers (used by class show methods) =====
     public static String truncateString(String str, int maxLength) {
@@ -207,26 +302,79 @@ public class HospitalManagement {
     // ===== Main Menu =====
     public static void mainMenu() {
         while (true) {
-            System.out.println("\n=== HOSPITAL MANAGEMENT SYSTEM MAIN MENU ===");
-            System.out.println("1. Doctors");
-            System.out.println("2. Patients");
-            System.out.println("3. Medicine");
-            System.out.println("4. Laboratories");
-            System.out.println("5. Facilities");
-            System.out.println("6. Staff");
-            System.out.println("7. Exit");
+            try {
+                System.out.println("\n=== HOSPITAL MANAGEMENT SYSTEM MAIN MENU ===");
+                System.out.println("1. Doctors");
+                System.out.println("2. Patients");
+                System.out.println("3. Medicine");
+                System.out.println("4. Laboratories");
+                System.out.println("5. Facilities");
+                System.out.println("6. Staff");
+                System.out.println("7. Exit");
 
-            int choice = readIntInRange("Please select an option (1-7): ", 1, 7);
-            switch (choice) {
-                case 1: doctorMenu(); break;
-                case 2: patientMenu(); break;
-                case 3: medicineMenu(); break;
-                case 4: labMenu(); break;
-                case 5: facilityMenu(); break;
-                case 6: staffMenu(); break;
-                case 7:
-                    System.out.println("\nThank you for using Hospital Management System!");
-                    return;
+                int choice = readIntInRange("Please select an option (1-7): ", 1, 7);
+                switch (choice) {
+                    case 1: 
+                        try {
+                            doctorMenu(); 
+                        } catch (Exception e) {
+                            System.out.println("Error accessing doctor management: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
+                        break;
+                    case 2: 
+                        try {
+                            patientMenu(); 
+                        } catch (Exception e) {
+                            System.out.println("Error accessing patient management: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
+                        break;
+                    case 3: 
+                        try {
+                            medicineMenu(); 
+                        } catch (Exception e) {
+                            System.out.println("Error accessing medicine management: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
+                        break;
+                    case 4: 
+                        try {
+                            labMenu(); 
+                        } catch (Exception e) {
+                            System.out.println("Error accessing lab management: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
+                        break;
+                    case 5: 
+                        try {
+                            facilityMenu(); 
+                        } catch (Exception e) {
+                            System.out.println("Error accessing facility management: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
+                        break;
+                    case 6: 
+                        try {
+                            staffMenu(); 
+                        } catch (Exception e) {
+                            System.out.println("Error accessing staff management: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
+                        break;
+                    case 7:
+                        try {
+                            System.out.println("\nThank you for using Hospital Management System!");
+                            return;
+                        } catch (Exception e) {
+                            System.out.println("Error during exit: " + e.getMessage());
+                            return;
+                        }
+                }
+            } catch (Exception e) {
+                System.out.println("Error in main menu: " + e.getMessage());
+                System.out.println("Returning to main menu...");
+                pressEnterToContinue();
             }
         }
     }
@@ -234,33 +382,51 @@ public class HospitalManagement {
     // ===== Doctors =====
     public static void doctorMenu() {
         while (true) {
-            System.out.println("\n=== DOCTOR MANAGEMENT ===");
-            System.out.println("1. Add New Doctor");
-            System.out.println("2. Show All Doctors");
-            System.out.println("3. Return to Main Menu");
+            try {
+                System.out.println("\n=== DOCTOR MANAGEMENT ===");
+                System.out.println("1. Add New Doctor");
+                System.out.println("2. Show All Doctors");
+                System.out.println("3. Return to Main Menu");
 
-            int choice = readIntInRange("Select (1-3): ", 1, 3);
-            switch (choice) {
-                case 1:
-                    if (doctorCount >= doctors.length) {
-                        System.out.println("Doctor array is full!");
-                        pressEnterToContinue();
+                int choice = readIntInRange("Select (1-3): ", 1, 3);
+                switch (choice) {
+                    case 1:
+                        try {
+                            if (doctorCount >= doctors.length) {
+                                System.out.println("Doctor array is full!");
+                                pressEnterToContinue();
+                                break;
+                            }
+                            doctors[doctorCount] = new Doctor();
+                            doctors[doctorCount].newDoctor();
+                            System.out.println("Doctor added successfully!");
+                            doctorCount++;
+                            pressEnterToContinue();
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            System.out.println("Error: Doctor array limit exceeded.");
+                            pressEnterToContinue();
+                        } catch (Exception e) {
+                            System.out.println("Error adding doctor: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
                         break;
-                    }
-                    doctors[doctorCount] = new Doctor();
-                    doctors[doctorCount].newDoctor();
-                    System.out.println("Added.");
-                    doctorCount++;
-                    pressEnterToContinue();
-                    break;
 
-                case 2:
-                    Doctor.showDoctorInfo(doctors, doctorCount); 
-                    pressEnterToContinue();
-                    break;
+                    case 2:
+                        try {
+                            Doctor.showDoctorInfo(doctors, doctorCount);
+                            pressEnterToContinue();
+                        } catch (Exception e) {
+                            System.out.println("Error displaying doctors: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
+                        break;
 
-                case 3:
-                    return;
+                    case 3:
+                        return;
+                }
+            } catch (Exception e) {
+                System.out.println("Error in doctor menu: " + e.getMessage());
+                pressEnterToContinue();
             }
         }
     }
@@ -268,33 +434,51 @@ public class HospitalManagement {
     // ===== Patients =====
     public static void patientMenu() {
         while (true) {
-            System.out.println("\n=== PATIENT MANAGEMENT ===");
-            System.out.println("1. Add New Patient");
-            System.out.println("2. Show All Patients");
-            System.out.println("3. Return to Main Menu");
+            try {
+                System.out.println("\n=== PATIENT MANAGEMENT ===");
+                System.out.println("1. Add New Patient");
+                System.out.println("2. Show All Patients");
+                System.out.println("3. Return to Main Menu");
 
-            int choice = readIntInRange("Select (1-3): ", 1, 3);
-            switch (choice) {
-                case 1:
-                    if (patientCount >= patients.length) {
-                        System.out.println("Patient array is full!");
-                        pressEnterToContinue();
+                int choice = readIntInRange("Select (1-3): ", 1, 3);
+                switch (choice) {
+                    case 1:
+                        try {
+                            if (patientCount >= patients.length) {
+                                System.out.println("Patient array is full!");
+                                pressEnterToContinue();
+                                break;
+                            }
+                            patients[patientCount] = new Patient();
+                            patients[patientCount].newPatient();
+                            System.out.println("Patient added successfully!");
+                            patientCount++;
+                            pressEnterToContinue();
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            System.out.println("Error: Patient array limit exceeded.");
+                            pressEnterToContinue();
+                        } catch (Exception e) {
+                            System.out.println("Error adding patient: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
                         break;
-                    }
-                    patients[patientCount] = new Patient();
-                    patients[patientCount].newPatient();
-                    System.out.println("Added.");
-                    patientCount++;
-                    pressEnterToContinue();
-                    break;
 
-                case 2:
-                    Patient.showPatientInfo(patients, patientCount);
-                    pressEnterToContinue();
-                    break;
+                    case 2:
+                        try {
+                            Patient.showPatientInfo(patients, patientCount);
+                            pressEnterToContinue();
+                        } catch (Exception e) {
+                            System.out.println("Error displaying patients: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
+                        break;
 
-                case 3:
-                    return;
+                    case 3:
+                        return;
+                }
+            } catch (Exception e) {
+                System.out.println("Error in patient menu: " + e.getMessage());
+                pressEnterToContinue();
             }
         }
     }
@@ -302,33 +486,51 @@ public class HospitalManagement {
     // ===== Medicines =====
     public static void medicineMenu() {
         while (true) {
-            System.out.println("\n=== MEDICINE MANAGEMENT ===");
-            System.out.println("1. Add New Medicine");
-            System.out.println("2. Show All Medicines");
-            System.out.println("3. Return to Main Menu");
+            try {
+                System.out.println("\n=== MEDICINE MANAGEMENT ===");
+                System.out.println("1. Add New Medicine");
+                System.out.println("2. Show All Medicines");
+                System.out.println("3. Return to Main Menu");
 
-            int choice = readIntInRange("Select (1-3): ", 1, 3);
-            switch (choice) {
-                case 1:
-                    if (medicineCount >= medicines.length) {
-                        System.out.println("Medicine array is full!");
-                        pressEnterToContinue();
+                int choice = readIntInRange("Select (1-3): ", 1, 3);
+                switch (choice) {
+                    case 1:
+                        try {
+                            if (medicineCount >= medicines.length) {
+                                System.out.println("Medicine array is full!");
+                                pressEnterToContinue();
+                                break;
+                            }
+                            medicines[medicineCount] = new Medicine();
+                            medicines[medicineCount].newMedicine();
+                            System.out.println("Medicine added successfully!");
+                            medicineCount++;
+                            pressEnterToContinue();
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            System.out.println("Error: Medicine array limit exceeded.");
+                            pressEnterToContinue();
+                        } catch (Exception e) {
+                            System.out.println("Error adding medicine: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
                         break;
-                    }
-                    medicines[medicineCount] = new Medicine();
-                    medicines[medicineCount].newMedicine();
-                    System.out.println("Added.");
-                    medicineCount++;
-                    pressEnterToContinue();
-                    break;
 
-                case 2:
-                    Medicine.findMedicine(medicines, medicineCount); 
-                    pressEnterToContinue();
-                    break;
+                    case 2:
+                        try {
+                            Medicine.findMedicine(medicines, medicineCount);
+                            pressEnterToContinue();
+                        } catch (Exception e) {
+                            System.out.println("Error displaying medicines: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
+                        break;
 
-                case 3:
-                    return;
+                    case 3:
+                        return;
+                }
+            } catch (Exception e) {
+                System.out.println("Error in medicine menu: " + e.getMessage());
+                pressEnterToContinue();
             }
         }
     }
@@ -336,33 +538,51 @@ public class HospitalManagement {
     // ===== Labs =====
     public static void labMenu() {
         while (true) {
-            System.out.println("\n=== LAB MANAGEMENT ===");
-            System.out.println("1. Add New Lab");
-            System.out.println("2. Show All Labs");
-            System.out.println("3. Return to Main Menu");
+            try {
+                System.out.println("\n=== LAB MANAGEMENT ===");
+                System.out.println("1. Add New Lab");
+                System.out.println("2. Show All Labs");
+                System.out.println("3. Return to Main Menu");
 
-            int choice = readIntInRange("Select (1-3): ", 1, 3);
-            switch (choice) {
-                case 1:
-                    if (labCount >= labs.length) {
-                        System.out.println("Lab array is full!");
-                        pressEnterToContinue();
+                int choice = readIntInRange("Select (1-3): ", 1, 3);
+                switch (choice) {
+                    case 1:
+                        try {
+                            if (labCount >= labs.length) {
+                                System.out.println("Lab array is full!");
+                                pressEnterToContinue();
+                                break;
+                            }
+                            labs[labCount] = new Lab();
+                            labs[labCount].newLab();
+                            System.out.println("Lab added successfully!");
+                            labCount++;
+                            pressEnterToContinue();
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            System.out.println("Error: Lab array limit exceeded.");
+                            pressEnterToContinue();
+                        } catch (Exception e) {
+                            System.out.println("Error adding lab: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
                         break;
-                    }
-                    labs[labCount] = new Lab();
-                    labs[labCount].newLab();
-                    System.out.println("Added.");
-                    labCount++;
-                    pressEnterToContinue();
-                    break;
 
-                case 2:
-                    Lab.labList(labs, labCount); 
-                    pressEnterToContinue();
-                    break;
+                    case 2:
+                        try {
+                            Lab.labList(labs, labCount);
+                            pressEnterToContinue();
+                        } catch (Exception e) {
+                            System.out.println("Error displaying labs: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
+                        break;
 
-                case 3:
-                    return;
+                    case 3:
+                        return;
+                }
+            } catch (Exception e) {
+                System.out.println("Error in lab menu: " + e.getMessage());
+                pressEnterToContinue();
             }
         }
     }
@@ -370,33 +590,51 @@ public class HospitalManagement {
     // ===== Facilities =====
     public static void facilityMenu() {
         while (true) {
-            System.out.println("\n=== FACILITY MANAGEMENT ===");
-            System.out.println("1. Add New Facility");
-            System.out.println("2. Show All Facilities");
-            System.out.println("3. Return to Main Menu");
+            try {
+                System.out.println("\n=== FACILITY MANAGEMENT ===");
+                System.out.println("1. Add New Facility");
+                System.out.println("2. Show All Facilities");
+                System.out.println("3. Return to Main Menu");
 
-            int choice = readIntInRange("Select (1-3): ", 1, 3);
-            switch (choice) {
-                case 1:
-                    if (facilityCount >= facilities.length) {
-                        System.out.println("Facility array is full!");
-                        pressEnterToContinue();
+                int choice = readIntInRange("Select (1-3): ", 1, 3);
+                switch (choice) {
+                    case 1:
+                        try {
+                            if (facilityCount >= facilities.length) {
+                                System.out.println("Facility array is full!");
+                                pressEnterToContinue();
+                                break;
+                            }
+                            facilities[facilityCount] = new Facility();
+                            facilities[facilityCount].newFacility();
+                            System.out.println("Facility added successfully!");
+                            facilityCount++;
+                            pressEnterToContinue();
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            System.out.println("Error: Facility array limit exceeded.");
+                            pressEnterToContinue();
+                        } catch (Exception e) {
+                            System.out.println("Error adding facility: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
                         break;
-                    }
-                    facilities[facilityCount] = new Facility();
-                    facilities[facilityCount].newFacility();
-                    System.out.println("Added.");
-                    facilityCount++;
-                    pressEnterToContinue();
-                    break;
 
-                case 2:
-                    Facility.showFacility(facilities, facilityCount); 
-                    pressEnterToContinue();
-                    break;
+                    case 2:
+                        try {
+                            Facility.showFacility(facilities, facilityCount);
+                            pressEnterToContinue();
+                        } catch (Exception e) {
+                            System.out.println("Error displaying facilities: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
+                        break;
 
-                case 3:
-                    return;
+                    case 3:
+                        return;
+                }
+            } catch (Exception e) {
+                System.out.println("Error in facility menu: " + e.getMessage());
+                pressEnterToContinue();
             }
         }
     }
@@ -404,44 +642,62 @@ public class HospitalManagement {
     // ===== Staff =====
     public static void staffMenu() {
         while (true) {
-            System.out.println("\n=== STAFF MANAGEMENT ===");
-            System.out.println("1. Add New Staff");
-            System.out.println("2. Show All Staff");
-            System.out.println("3. Return to Main Menu");
+            try {
+                System.out.println("\n=== STAFF MANAGEMENT ===");
+                System.out.println("1. Add New Staff");
+                System.out.println("2. Show All Staff");
+                System.out.println("3. Return to Main Menu");
 
-            int choice = readIntInRange("Select (1-3): ", 1, 3);
-            switch (choice) {
-                case 1:
-                    if (staffCount >= staffs.length) {
-                        System.out.println("Staff array is full!");
-                        pressEnterToContinue();
+                int choice = readIntInRange("Select (1-3): ", 1, 3);
+                switch (choice) {
+                    case 1:
+                        try {
+                            if (staffCount >= staffs.length) {
+                                System.out.println("Staff array is full!");
+                                pressEnterToContinue();
+                                break;
+                            }
+
+                            System.out.println("\nAdd which type?");
+                            System.out.println("1) Nurse   2) Pharmacist   3) Security   4) Generic Staff");
+                            int t = readIntInRange("Select (1-4): ", 1, 4);
+
+                            Staff s;
+                            if (t == 1) s = new Nurse();
+                            else if (t == 2) s = new Pharmacist();
+                            else if (t == 3) s = new SecurityStaff();
+                            else s = new Staff();
+
+                            s.newStaff();
+                            System.out.println("Staff added successfully!");
+                            staffs[staffCount++] = s;
+
+                            pressEnterToContinue();
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            System.out.println("Error: Staff array limit exceeded.");
+                            pressEnterToContinue();
+                        } catch (Exception e) {
+                            System.out.println("Error adding staff: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
                         break;
-                    }
 
-                    System.out.println("\nAdd which type?");
-                    System.out.println("1) Nurse   2) Pharmacist   3) Security   4) Generic Staff");
-                    int t = readIntInRange("Select (1-4): ", 1, 4);
+                    case 2:
+                        try {
+                            Staff.showStaffInfo(staffs, staffCount);
+                            pressEnterToContinue();
+                        } catch (Exception e) {
+                            System.out.println("Error displaying staff: " + e.getMessage());
+                            pressEnterToContinue();
+                        }
+                        break;
 
-                    Staff s;
-                    if (t == 1) s = new Nurse();
-                    else if (t == 2) s = new Pharmacist();
-                    else if (t == 3) s = new SecurityStaff();
-                    else s = new Staff();
-
-                    s.newStaff();
-                    System.out.println("Added.");
-                    staffs[staffCount++] = s;
-
-                    pressEnterToContinue();
-                    break;
-
-                case 2:
-                    Staff.showStaffInfo(staffs, staffCount); 
-                    pressEnterToContinue();
-                    break;
-
-                case 3:
-                    return;
+                    case 3:
+                        return;
+                }
+            } catch (Exception e) {
+                System.out.println("Error in staff menu: " + e.getMessage());
+                pressEnterToContinue();
             }
         }
     }

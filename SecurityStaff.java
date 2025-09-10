@@ -7,15 +7,23 @@ public class SecurityStaff extends Staff {
     }
 
     public SecurityStaff(String id, String name, String sex, int salary, String clearanceLevel) {
-        super(id, name, "Security", sex, salary);
+        super(id, HospitalManagement.formatText(name), "Security", sex, salary);  // Add formatText here
         this.clearanceLevel = HospitalManagement.normalizeClearanceLevel(clearanceLevel);
     }
 
     @Override
     public void newStaff() {
         System.out.println("\n-- New Security Staff --");
-        String id = HospitalManagement.readNonEmpty("Enter Staff ID: ");
-        String name = HospitalManagement.readNonEmpty("Enter Name: ");
+        
+        // Get existing staff IDs for duplicate check
+        String[] existingIDs = new String[HospitalManagement.getStaffCount()];
+        Staff[] staffs = HospitalManagement.getStaffs();
+        for (int i = 0; i < HospitalManagement.getStaffCount(); i++) {
+            existingIDs[i] = staffs[i].getId();
+        }
+        
+        String id = HospitalManagement.validateAndFormatID("Enter Staff ID: ", existingIDs, HospitalManagement.getStaffCount());
+        String name = HospitalManagement.validateAndReadString("Enter Name: ", "Name");
         String sex = HospitalManagement.readSex();
         int salary = HospitalManagement.readIntNonNegative("Enter Salary (>=0): ");
         String clOk = HospitalManagement.readClearanceLevelStrict();  
