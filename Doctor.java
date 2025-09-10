@@ -1,5 +1,3 @@
-import java.util.Scanner;
-
 public class Doctor {
     private String id;
     private String name;
@@ -7,16 +5,9 @@ public class Doctor {
     private String workTime;
     private String qualification;
     private int room;
-    
-    public Doctor() {
-        this.id = "";
-        this.name = "";
-        this.specialist = "";
-        this.workTime = "";
-        this.qualification = "";
-        this.room = 0;
-    }
-    
+
+    public Doctor() {}
+
     public Doctor(String id, String name, String specialist, String workTime, String qualification, int room) {
         this.id = id;
         this.name = name;
@@ -25,57 +16,44 @@ public class Doctor {
         this.qualification = qualification;
         this.room = room;
     }
-    
-    // Method to create new doctor with user input
+
     public void newDoctor() {
-        Scanner scanner = new Scanner(System.in);
-        
-        try {
-            System.out.print("Enter Doctor ID: ");
-            this.id = scanner.nextLine();
-            
-            System.out.print("Enter Doctor Name: ");
-            this.name = scanner.nextLine();
-            
-            System.out.print("Enter Specialization: ");
-            this.specialist = scanner.nextLine();
-            
-            System.out.print("Enter Work Time (Ex. 9AM-5PM): ");
-            this.workTime = scanner.nextLine();
-            
-            System.out.print("Enter Qualification: ");
-            this.qualification = scanner.nextLine();
-            
-            System.out.print("Enter Room Number: ");
-            while (!scanner.hasNextInt()) {
-                System.out.println("\nInvalid input! \nPlease enter a valid room number (integer): ");
-                scanner.next();
-                System.out.println();
-            }
-            this.room = scanner.nextInt();
-            scanner.nextLine(); // consume newline
-            
-            System.out.println("\nDoctor added successfully!");
-            
-        } catch (Exception e) {
-            System.out.println("\nAn error occurred while adding doctor: " + e.getMessage() + "\n");
+        System.out.println("\n-- New Doctor --");
+        this.id = HospitalManagement.readNonEmpty("Enter Doctor ID: ");
+        this.name = HospitalManagement.readNonEmpty("Enter Name: ");
+        this.specialist = HospitalManagement.readNonEmpty("Enter Specialist: ");
+        this.workTime = HospitalManagement.readNonEmpty("Enter Work Time (Ex. 8am-10am): ");
+        this.qualification = HospitalManagement.readNonEmpty("Enter Qualification: ");
+        this.room = HospitalManagement.readIntNonNegative("Enter Room No (>=0): ");
+    }
+
+    public static void showDoctorInfo(Doctor[] doctors, int count) {
+        System.out.println("\n=== ALL DOCTORS ===");
+        if (count == 0) {
+            System.out.println("No doctors found!");
+            return;
+        }
+        System.out.printf("%-6s %-18s %-15s %-12s %-18s %-8s\n",
+                "ID", "Name", "Specialist", "Work Time", "Qualification", "Room No.");
+        HospitalManagement.printSeparator(6, 18, 15, 12, 18, 8);
+        for (int i = 0; i < count; i++) {
+            System.out.printf("%-6s %-18s %-15s %-12s %-18s %-8d\n",
+                    doctors[i].getId(),
+                    HospitalManagement.truncateString(doctors[i].getName(), 18),
+                    HospitalManagement.truncateString(doctors[i].getSpecialist(), 15),
+                    HospitalManagement.truncateString(doctors[i].getWorkTime(), 12),
+                    HospitalManagement.truncateString(doctors[i].getQualification(), 18),
+                    doctors[i].getRoom());
         }
     }
-    
-    // Method to display doctor information
-    public void showDoctorInfo() {
-        System.out.println(id + " " + name + " " + specialist + " " + workTime + " " + qualification + " " + room);
-    }
-    
-    // Getter methods
+
+    // Getters/Setters
     public String getId() { return id; }
     public String getName() { return name; }
     public String getSpecialist() { return specialist; }
     public String getWorkTime() { return workTime; }
     public String getQualification() { return qualification; }
     public int getRoom() { return room; }
-    
-    // Setter methods
     public void setId(String id) { this.id = id; }
     public void setName(String name) { this.name = name; }
     public void setSpecialist(String specialist) { this.specialist = specialist; }

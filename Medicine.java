@@ -1,20 +1,12 @@
-import java.util.Scanner;
-
 public class Medicine {
     private String name;
     private String manufacturer;
-    private String expiryDate;
+    private String expiryDate; // keep as string
     private int cost;
     private int count;
-    
-    public Medicine() {
-        this.name = "";
-        this.manufacturer = "";
-        this.expiryDate = "";
-        this.cost = 0;
-        this.count = 0;
-    }
-    
+
+    public Medicine() {}
+
     public Medicine(String name, String manufacturer, String expiryDate, int cost, int count) {
         this.name = name;
         this.manufacturer = manufacturer;
@@ -22,58 +14,40 @@ public class Medicine {
         this.cost = cost;
         this.count = count;
     }
-    
-    // Method to create new medicine with user input
+
     public void newMedicine() {
-        Scanner scanner = new Scanner(System.in);
-        
-        try {
-            System.out.print("Enter Medicine Name: ");
-            this.name = scanner.nextLine();
-            
-            System.out.print("Enter Manufacturer: ");
-            this.manufacturer = scanner.nextLine();
-            
-            System.out.print("Enter Expiry Date (Ex. 2026-12-31): ");
-            this.expiryDate = scanner.nextLine();
-            
-            System.out.print("Enter Cost: RM");
-            while (!scanner.hasNextInt()) {
-                System.out.println("\nInvalid input! \nPlease enter a valid cost (integer): RM");
-                scanner.next();
-                System.out.println();
-            }
-            this.cost = scanner.nextInt();
-            
-            System.out.print("Enter Number of Units: ");
-            while (!scanner.hasNextInt()) {
-                System.out.println("\nInvalid input! \nPlease enter a valid number of units (integer): ");
-                scanner.next();
-                System.out.println();
-            }
-            this.count = scanner.nextInt();
-            scanner.nextLine(); // consume newline
-            
-            System.out.println("\nMedicine added successfully!");
-            
-        } catch (Exception e) {
-            System.out.println("\nAn error occurred while adding medicine: " + e.getMessage() + "\n");
+        System.out.println("\n-- New Medicine --");
+        this.name = HospitalManagement.readNonEmpty("Enter Medicine Name: ");
+        this.manufacturer = HospitalManagement.readNonEmpty("Enter Manufacturer: ");
+        this.expiryDate = HospitalManagement.readNonEmpty("Enter Expiry Date (YYYY-MM-DD): ");
+        this.cost = HospitalManagement.readIntNonNegative("Enter Cost (>=0): ");
+        this.count = HospitalManagement.readIntNonNegative("Enter Unit Count (>=0): ");
+    }
+
+    public static void findMedicine(Medicine[] meds, int count) {
+        System.out.println("\n=== ALL MEDICINES ===");
+        if (count == 0) {
+            System.out.println("No medicines found!");
+            return;
+        }
+        System.out.printf("%-18s %-18s %-15s %-8s\n",
+                "Name", "Manufacturer", "Expiry Date", "Cost");
+        HospitalManagement.printSeparator(18, 18, 15, 8);
+        for (int i = 0; i < count; i++) {
+            System.out.printf("%-18s %-18s %-15s %-8d\n",
+                    HospitalManagement.truncateString(meds[i].getName(), 18),
+                    HospitalManagement.truncateString(meds[i].getManufacturer(), 18),
+                    HospitalManagement.truncateString(meds[i].getExpiryDate(), 15),
+                    meds[i].getCost());
         }
     }
-    
-    // Method to display medicine information
-    public void findMedicine() {
-        System.out.println(name + " " + manufacturer + " " + expiryDate + " " + cost);
-    }
-    
-    // Getter methods
+
+    // Getters/Setters
     public String getName() { return name; }
     public String getManufacturer() { return manufacturer; }
     public String getExpiryDate() { return expiryDate; }
     public int getCost() { return cost; }
     public int getCount() { return count; }
-    
-    // Setter methods
     public void setName(String name) { this.name = name; }
     public void setManufacturer(String manufacturer) { this.manufacturer = manufacturer; }
     public void setExpiryDate(String expiryDate) { this.expiryDate = expiryDate; }
