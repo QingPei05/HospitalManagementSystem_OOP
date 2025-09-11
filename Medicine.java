@@ -23,11 +23,11 @@ public class Medicine {
         
         // Validate cost range
         while (true) {
-            this.cost = HospitalManagement.readIntNonNegative("Enter Cost (1-10000): ");
-            if (this.cost >= 1 && this.cost <= 10000) {
+            this.cost = HospitalManagement.readIntNonNegative("Enter Cost (1-100000): ");
+            if (this.cost >= 1 && this.cost <= 100000) {
                 break;
             }
-            System.out.println("Cost should be between 1 and 10000.");
+            System.out.println("Cost should be between 1 and 100000.");
         }
         
         this.count = HospitalManagement.readIntNonNegative("Enter Unit Count (>=0): ");

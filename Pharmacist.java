@@ -22,10 +22,15 @@ public class Pharmacist extends Staff {
             existingIDs[i] = staffs[i].getId();
         }
         
+        int salary = HospitalManagement.readIntNonNegative("Enter Salary (>=1000 and <=50000): ");
+        while (salary < 1000 || salary > 50000) {
+            System.out.println("Salary should be between 1000 and 50000.");
+            salary = HospitalManagement.readIntNonNegative("Enter Salary (1000-50000): ");
+        }
+        
         String id = HospitalManagement.validateAndFormatID("Enter Staff ID: ", existingIDs, HospitalManagement.getStaffCount());
         String name = HospitalManagement.validateAndReadString("Enter Name: ", "Name");
         String sex = HospitalManagement.readSex();
-        int salary = HospitalManagement.readIntNonNegative("Enter Salary (>=0): ");
         String license = HospitalManagement.readNonEmpty("Enter License Number: ");
         setId(id);
         setName(name);

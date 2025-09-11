@@ -15,11 +15,11 @@ public class Lab {
         
         // Validate cost range
         while (true) {
-            this.cost = HospitalManagement.readIntNonNegative("Enter Cost (1-5000): ");
-            if (this.cost >= 1 && this.cost <= 5000) {
+            this.cost = HospitalManagement.readIntNonNegative("Enter Cost (1-100000): ");
+            if (this.cost >= 1 && this.cost <= 100000) {
                 break;
             }
-            System.out.println("Lab cost should be between 1 and 5000.");
+            System.out.println("Lab cost should be between 1 and 100000.");
         }
     }
 

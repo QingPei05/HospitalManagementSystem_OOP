@@ -178,12 +178,12 @@ public class HMSAppFX extends Application {
         titleBox.setPadding(new Insets(0, 0, 20, 0));
 
         TabPane tabs = new TabPane(
-                createStyledTab("👨‍⚕️ Doctors",   doctorsPane()),
-                createStyledTab("🏥 Patients",  patientsPane()),
-                createStyledTab("💊 Medicine",  medicinesPane()),
-                createStyledTab("🔬 Labs",      labsPane()),
-                createStyledTab("🏢 Facilities",facilitiesPane()),
-                createStyledTab("👥 Staff",     staffPane())
+                createStyledTab("Doctors",   doctorsPane()),
+                createStyledTab("Patients",  patientsPane()),
+                createStyledTab("Medicine",  medicinesPane()),
+                createStyledTab("Labs",      labsPane()),
+                createStyledTab("Facilities",facilitiesPane()),
+                createStyledTab("Staff",     staffPane())
         );
         tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         tabs.setStyle(
@@ -465,7 +465,7 @@ public class HMSAppFX extends Application {
         TextField tfName = createStyledTextField("Name", 160);
         TextField tfManu = createStyledTextField("Manufacturer", 160);
         TextField tfExp  = createStyledTextField("Expiry Date (YYYY-MM-DD)", 200);
-        TextField tfCost = createStyledTextField("Cost (1-10000)", 100);
+        TextField tfCost = createStyledTextField("Cost (1-100000)", 100);
         Button add = createStyledButton("Add Medicine", "#ff9800");
         
         add.setOnAction(e -> {
@@ -474,7 +474,7 @@ public class HMSAppFX extends Application {
                 String name = validateAndFormatName(tfName.getText(), "Name", tfName);
                 String manu = validateAndFormatName(tfManu.getText(), "Manufacturer", tfManu);
                 String exp  = validateDate(tfExp.getText(), tfExp);
-                int cost    = validateCost(tfCost.getText(), 1, 10000, tfCost);
+                int cost    = validateCost(tfCost.getText(), 1, 100000, tfCost);
                 
                 Medicine m = new Medicine(name, manu, exp, cost, 0);
                 if (!HospitalManagement.addMedicine(m)) {
@@ -507,14 +507,14 @@ public class HMSAppFX extends Application {
         tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         TextField tfLab  = createStyledTextField("Lab", 200);
-        TextField tfCost = createStyledTextField("Cost (1-5000)", 120);
+        TextField tfCost = createStyledTextField("Cost (1-100000)", 120);
         Button add = createStyledButton("Add Lab", "#9c27b0");
         
         add.setOnAction(e -> {
             clearInvalidStates(tfLab, tfCost);
             try {
                 String lab = validateAndFormatName(tfLab.getText(), "Lab", tfLab);
-                int cost   = validateCost(tfCost.getText(), 1, 5000, tfCost);
+                int cost   = validateCost(tfCost.getText(), 1, 100000, tfCost);
                 
                 Lab l = new Lab(lab, cost);
                 if (!HospitalManagement.addLab(l)) {
@@ -1090,4 +1090,5 @@ public class HMSAppFX extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+
 }

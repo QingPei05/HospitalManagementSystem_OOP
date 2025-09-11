@@ -31,12 +31,9 @@ public class Staff {
         this.sex = HospitalManagement.readSex();
         
         // Validate salary range
-        while (true) {
-            this.salary = HospitalManagement.readIntNonNegative("Enter Salary (1000-50000): ");
-            if (this.salary >= 1000 && this.salary <= 50000) {
-                break;
-            }
+        while (this.salary < 1000 || this.salary > 50000) {
             System.out.println("Salary should be between 1000 and 50000.");
+            this.salary = HospitalManagement.readIntNonNegative("Enter Salary (>=1000 and <=50000): ");
         }
     }
 
